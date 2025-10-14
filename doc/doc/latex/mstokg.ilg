@@ -1,0 +1,7 @@
+This is makeindex, version 2.17 [TeX Live 2025] (kpathsea + Thai support).
+Scanning style file ./python.ist.......done (7 attributes redefined, 0 ignored).
+Scanning input file mstokg.idx....done (18 entries accepted, 0 rejected).
+Sorting entries....done (81 comparisons).
+Generating output file mstokg.ind....done (56 lines written, 0 warnings).
+Output written in mstokg.ind.
+Transcript written in mstokg.ilg.

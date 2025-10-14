@@ -1,0 +1,56 @@
+\begin{sphinxtheindex}
+\let\bigletter\sphinxstyleindexlettergroup
+\let\spxpagem \sphinxstyleindexpagemain
+\let\spxentry \sphinxstyleindexentry
+\let\spxextra \sphinxstyleindexextra
+
+  \bigletter B
+  \item \spxentry{BasisReshape()}\spxextra{in module MSTOOpt}, \hyperpage{3}
+
+  \indexspace
+  \bigletter C
+  \item \spxentry{CrossOvers()}\spxextra{in module MSTOOpt}, \hyperpage{4}
+
+  \indexspace
+  \bigletter D
+  \item \spxentry{dmol()}\spxextra{in module MSTOOpt}, \hyperpage{4}
+  \item \spxentry{dumpBSI()}\spxextra{in module MSTOOpt}, \hyperpage{4}
+
+  \indexspace
+  \bigletter F
+  \item \spxentry{FetchBestMol()}\spxextra{in module MSTOOpt}, \hyperpage{4}
+
+  \indexspace
+  \bigletter G
+  \item \spxentry{GenerateInitialPopulation()}\spxextra{in module MSTOOpt}, \hyperpage{4}
+  \item \spxentry{getcoeffs()}\spxextra{in module MSTOOpt}, \hyperpage{5}
+  \item \spxentry{getEnergies()}\spxextra{in module MSTOOpt}, \hyperpage{5}
+
+  \indexspace
+  \bigletter L
+  \item \spxentry{loadBSI()}\spxextra{in module MSTOOpt}, \hyperpage{6}
+
+  \indexspace
+  \bigletter M
+  \item \spxentry{module}
+    \subitem \spxentry{MSTOOpt}, \hyperpage{3}
+  \item \spxentry{moldict()}\spxextra{in module MSTOOpt}, \hyperpage{6}
+  \item \spxentry{MSTOOpt}
+    \subitem \spxentry{module}, \hyperpage{3}
+  \item \spxentry{Mutate()}\spxextra{in module MSTOOpt}, \hyperpage{4}
+  \item \spxentry{Mutate\_v2()}\spxextra{in module MSTOOpt}, \hyperpage{4}
+
+  \indexspace
+  \bigletter O
+  \item \spxentry{OptimizeElement()}\spxextra{in module MSTOOpt}, \hyperpage{4}
+  \item \spxentry{OptimizeElement\_vNW00()}\spxextra{in module MSTOOpt}, \hyperpage{4}
+
+  \indexspace
+  \bigletter P
+  \item \spxentry{putcoeffs()}\spxextra{in module MSTOOpt}, \hyperpage{6}
+
+  \indexspace
+  \bigletter R
+  \item \spxentry{randomize()}\spxextra{in module MSTOOpt}, \hyperpage{8}
+
+\end{sphinxtheindex}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.5.3)  13 OCT 2025 14:55
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.5.3)  14 OCT 2025 13:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -925,28 +925,43 @@ Overfull \vbox (0.52196pt too high) detected at line 166
 [5]
 
 [6]
+
+[7]
 LaTeX Font Info:    Font shape `TS1/txtt/m/it' in size <10> not available
-(Font)              Font shape `TS1/txtt/m/sl' tried instead on input line 580.
+(Font)              Font shape `TS1/txtt/m/sl' tried instead on input line 755.
 
 
+Overfull \vbox (2.32195pt too high) detected at line 777
+ []
 
-[7{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc}]
+
 
 [8]
 
+[9{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc}]
+
+[10
+
+]
 
 
-[9
 
+[11
 
 
 ] (./mstokg.ind
 
-[10
+[12
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 25--26
+Underfull \hbox (badness 10000) in paragraph at lines 12--13
+[]\T1/txtt/m/n/10 CreateMoleculesStdBasisSets() \T1/qtm/m/n/10 (\T1/qtm/m/it/10
+ in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 27--28
 []\T1/txtt/m/n/10 GenerateInitialPopulation() \T1/qtm/m/n/10 (\T1/qtm/m/it/10 i
 n mod-ule
  []
@@ -955,8 +970,7 @@ n mod-ule
 
 
 
-[11
-
+[13
 
 ]) (./mstokg.aux)
  ***********
@@ -964,13 +978,13 @@ LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `mstokg.out' has not changed.
-(rerunfilecheck)             Checksum: 5C336C9A60FC8E937F643AC6FF8B0E2A;274.
+(rerunfilecheck)             Checksum: 545866394EDF3EC98A3ED20F45A4162E;274.
  ) 
 Here is how much of TeX's memory you used:
- 20211 strings out of 473190
- 361256 string characters out of 5715801
- 807193 words of memory out of 5000000
- 43028 multiletter control sequences out of 15000+600000
+ 20217 strings out of 473190
+ 361360 string characters out of 5715801
+ 816249 words of memory out of 5000000
+ 43030 multiletter control sequences out of 15000+600000
  610170 words of font info for 79 fonts, out of 8000000 for 9000
  1142 hyphenation exceptions out of 8191
  72i,11n,82p,1195b,754s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -987,10 +1001,10 @@ fonts/type1/public/txfonts/t1xbtt.pfb></usr/local/texlive/2025/texmf-dist/fonts
 /public/txfonts/t1xtt.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/publi
 c/txfonts/tcxtt.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/u
 tmr8a.pfb>
-Output written on mstokg.pdf (15 pages, 200643 bytes).
+Output written on mstokg.pdf (17 pages, 208838 bytes).
 PDF statistics:
- 203 PDF objects out of 1000 (max. 8388607)
- 162 compressed objects within 2 object streams
- 36 named destinations out of 1000 (max. 500000)
+ 221 PDF objects out of 1000 (max. 8388607)
+ 178 compressed objects within 2 object streams
+ 40 named destinations out of 1000 (max. 500000)
  45 words of extra memory for PDF output out of 10000 (max. 10000000)
 

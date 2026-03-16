@@ -1,11 +1,11 @@
 # Fdb version 4
-["makeindex mstokg.idx"] 1760347526.61742 "mstokg.idx" "mstokg.ind" "mstokg" 1760347529.33562 0
-  "mstokg.idx" 1760347529.07513 1962 a1801f93bb5f231442c0267260147b86 "pdflatex"
+["makeindex mstokg.idx"] 1760429553.85176 "mstokg.idx" "mstokg.ind" "mstokg" 1760430515.99148 0
+  "mstokg.idx" 1760430515.61708 2222 831336bc48c1865f99b09b28c0a21fbc "pdflatex"
   (generated)
   "mstokg.ilg"
   "mstokg.ind"
   (rewritten before read)
-["pdflatex"] 1760347527.43778 "mstokg.tex" "mstokg.pdf" "mstokg" 1760347529.33583 0
+["pdflatex"] 1760430512.71882 "mstokg.tex" "mstokg.pdf" "mstokg" 1760430515.99176 0
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/tex-gyre/q-ec.enc" 1529098226 2457 aaabbccba4df2a7f7371410ee4e075a3 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc" 1529098226 3124 3813fd4c981d99822890a2861b0d274c ""
@@ -162,13 +162,13 @@
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1746292509 5467155 19efa205003f9ecad95fbbaa6ff24da1 ""
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1746292111 3345734 d70e78324abbeee9578783a0934256e2 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "mstokg.aux" 1760347529.07331 1842 09bf2d9ba80db250e2165068e4fcfac5 "pdflatex"
-  "mstokg.ind" 1760347527.43081 1849 e5149ca2e362e9910c2c9553103ee605 "makeindex mstokg.idx"
-  "mstokg.out" 1760347529.07452 274 5c336c9a60fc8e937f643ac6ff8b0e2a "pdflatex"
-  "mstokg.tex" 1760347488.59971 29444 b1061644422b74e67103668853071c68 ""
-  "mstokg.toc" 1760347529.07525 200 53befc8fb027355891b2e524bba18aae "pdflatex"
+  "mstokg.aux" 1760430515.61453 1987 a4dbf0f9aa1ccf551cb6df4867978537 "pdflatex"
+  "mstokg.ind" 1760429554.14275 2018 823c47309797f9fa2086b05e92f3804a "makeindex mstokg.idx"
+  "mstokg.out" 1760430515.61639 274 545866394edf3ec98a3ed20f45a4162e "pdflatex"
+  "mstokg.tex" 1760430449.64022 39775 d6f185fb7a35c2d7ed650e2a28fb9f56 ""
+  "mstokg.toc" 1760430515.61725 201 f6f051f45bfe4270cfd572ed6c48f2e1 "pdflatex"
   "sphinx.sty" 1740936836 54203 ee7fe875437470f5328ee20661bb9f1d ""
-  "sphinxhighlight.sty" 1760347488.44987 7553 83fb52292c17957d9f4aadcb28c57a87 ""
+  "sphinxhighlight.sty" 1760430512.0011 7553 83fb52292c17957d9f4aadcb28c57a87 ""
   "sphinxlatexadmonitions.sty" 1740936836 19111 5e67a0f91439018bceb7cadf319345e6 ""
   "sphinxlatexcontainers.sty" 1740936836 900 d61f923db071a7b54d3cee8a1e6935d3 ""
   "sphinxlatexgraphics.sty" 1740936836 4918 c9266041d02bc615d54b890e96e3acd3 ""
@@ -183,7 +183,7 @@
   "sphinxlatexstyletext.sty" 1740936836 6759 9e932c65374cfb62686485d331bc975c ""
   "sphinxlatextables.sty" 1740936836 57643 7f1013c2fa11942370d867527bdda568 ""
   "sphinxmanual.cls" 1740936836 4241 7b0d7a37df7b5715fb0dbd585c52ecdb ""
-  "sphinxmessages.sty" 1760347488.60615 745 3f5fcd6cdd7964ed608767954a8ced6f ""
+  "sphinxmessages.sty" 1760430512.18208 745 3f5fcd6cdd7964ed608767954a8ced6f ""
   "sphinxoptionsgeometry.sty" 1740936836 2060 6c27b3eba37bde592ae8908ab2c1ac0f ""
   "sphinxoptionshyperref.sty" 1740936836 1093 e468489bae7631a7f387b4b0f7bc15d4 ""
   "sphinxpackageboxes.sty" 1740936836 36106 1be2053eb1cb9b083b3a75e3657bcb24 ""

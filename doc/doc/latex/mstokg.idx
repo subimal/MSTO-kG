@@ -1,18 +1,20 @@
 \indexentry{module@\spxentry{module}!MSTOOpt@\spxentry{MSTOOpt}|hyperpage}{3}
 \indexentry{MSTOOpt@\spxentry{MSTOOpt}!module@\spxentry{module}|hyperpage}{3}
 \indexentry{BasisReshape() (in module MSTOOpt)@\spxentry{BasisReshape()}\spxextra{in module MSTOOpt}|hyperpage}{3}
+\indexentry{CreateMoleculesStdBasisSets() (in module MSTOOpt)@\spxentry{CreateMoleculesStdBasisSets()}\spxextra{in module MSTOOpt}|hyperpage}{4}
 \indexentry{CrossOvers() (in module MSTOOpt)@\spxentry{CrossOvers()}\spxextra{in module MSTOOpt}|hyperpage}{4}
+\indexentry{DumpStandardBasis() (in module MSTOOpt)@\spxentry{DumpStandardBasis()}\spxextra{in module MSTOOpt}|hyperpage}{4}
 \indexentry{FetchBestMol() (in module MSTOOpt)@\spxentry{FetchBestMol()}\spxextra{in module MSTOOpt}|hyperpage}{4}
-\indexentry{GenerateInitialPopulation() (in module MSTOOpt)@\spxentry{GenerateInitialPopulation()}\spxextra{in module MSTOOpt}|hyperpage}{4}
-\indexentry{Mutate() (in module MSTOOpt)@\spxentry{Mutate()}\spxextra{in module MSTOOpt}|hyperpage}{4}
-\indexentry{Mutate\_v2() (in module MSTOOpt)@\spxentry{Mutate\_v2()}\spxextra{in module MSTOOpt}|hyperpage}{4}
-\indexentry{OptimizeElement() (in module MSTOOpt)@\spxentry{OptimizeElement()}\spxextra{in module MSTOOpt}|hyperpage}{4}
-\indexentry{OptimizeElement\_vNW00() (in module MSTOOpt)@\spxentry{OptimizeElement\_vNW00()}\spxextra{in module MSTOOpt}|hyperpage}{4}
-\indexentry{dmol() (in module MSTOOpt)@\spxentry{dmol()}\spxextra{in module MSTOOpt}|hyperpage}{4}
-\indexentry{dumpBSI() (in module MSTOOpt)@\spxentry{dumpBSI()}\spxextra{in module MSTOOpt}|hyperpage}{4}
-\indexentry{getEnergies() (in module MSTOOpt)@\spxentry{getEnergies()}\spxextra{in module MSTOOpt}|hyperpage}{5}
-\indexentry{getcoeffs() (in module MSTOOpt)@\spxentry{getcoeffs()}\spxextra{in module MSTOOpt}|hyperpage}{5}
-\indexentry{loadBSI() (in module MSTOOpt)@\spxentry{loadBSI()}\spxextra{in module MSTOOpt}|hyperpage}{6}
-\indexentry{moldict() (in module MSTOOpt)@\spxentry{moldict()}\spxextra{in module MSTOOpt}|hyperpage}{6}
-\indexentry{putcoeffs() (in module MSTOOpt)@\spxentry{putcoeffs()}\spxextra{in module MSTOOpt}|hyperpage}{6}
-\indexentry{randomize() (in module MSTOOpt)@\spxentry{randomize()}\spxextra{in module MSTOOpt}|hyperpage}{8}
+\indexentry{GenerateInitialPopulation() (in module MSTOOpt)@\spxentry{GenerateInitialPopulation()}\spxextra{in module MSTOOpt}|hyperpage}{5}
+\indexentry{LogicalRefinement() (in module MSTOOpt)@\spxentry{LogicalRefinement()}\spxextra{in module MSTOOpt}|hyperpage}{5}
+\indexentry{Mutate() (in module MSTOOpt)@\spxentry{Mutate()}\spxextra{in module MSTOOpt}|hyperpage}{5}
+\indexentry{Mutate\_v2() (in module MSTOOpt)@\spxentry{Mutate\_v2()}\spxextra{in module MSTOOpt}|hyperpage}{5}
+\indexentry{OptimizeElement() (in module MSTOOpt)@\spxentry{OptimizeElement()}\spxextra{in module MSTOOpt}|hyperpage}{5}
+\indexentry{dmol() (in module MSTOOpt)@\spxentry{dmol()}\spxextra{in module MSTOOpt}|hyperpage}{6}
+\indexentry{dumpBSI() (in module MSTOOpt)@\spxentry{dumpBSI()}\spxextra{in module MSTOOpt}|hyperpage}{6}
+\indexentry{getEnergies() (in module MSTOOpt)@\spxentry{getEnergies()}\spxextra{in module MSTOOpt}|hyperpage}{6}
+\indexentry{getcoeffs() (in module MSTOOpt)@\spxentry{getcoeffs()}\spxextra{in module MSTOOpt}|hyperpage}{7}
+\indexentry{loadBSI() (in module MSTOOpt)@\spxentry{loadBSI()}\spxextra{in module MSTOOpt}|hyperpage}{7}
+\indexentry{moldict() (in module MSTOOpt)@\spxentry{moldict()}\spxextra{in module MSTOOpt}|hyperpage}{7}
+\indexentry{putcoeffs() (in module MSTOOpt)@\spxentry{putcoeffs()}\spxextra{in module MSTOOpt}|hyperpage}{8}
+\indexentry{randomize() (in module MSTOOpt)@\spxentry{randomize()}\spxextra{in module MSTOOpt}|hyperpage}{9}

@@ -91,9 +91,50 @@ documentation for details.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="MSTOOpt.CreateMoleculesStdBasisSets">
+<span class="sig-prename descclassname"><span class="pre">MSTOOpt.</span></span><span class="sig-name descname"><span class="pre">CreateMoleculesStdBasisSets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'H</span> <span class="pre">Li</span> <span class="pre">Be</span> <span class="pre">B</span> <span class="pre">C</span> <span class="pre">N</span> <span class="pre">O</span> <span class="pre">F</span> <span class="pre">H2</span> <span class="pre">LiH</span> <span class="pre">HF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basissets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['6-31g',</span> <span class="pre">'ccpvdz']</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MSTOOpt.CreateMoleculesStdBasisSets" title="Link to this definition">¶</a></dt>
+<dd><p>Batch creation of molecule objects from standard basis sets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>molecules</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – A string of space separated molecules as specified in <a class="reference internal" href="#MSTOOpt.moldict" title="MSTOOpt.moldict"><code class="xref py py-func docutils literal notranslate"><span class="pre">MSTOOpt.moldict()</span></code></a></p></li>
+<li><p><strong>basissets</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – A list of basis set names for which the molecule objects are computed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Example<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">CreateMoleculesStdBasisSets</span><span class="p">(</span><span class="n">molecules</span><span class="o">=</span><span class="s1">&#39;H Li Be B C N O F H2 LiH HF&#39;</span><span class="p">,</span> <span class="n">basissets</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;6-31g&#39;</span><span class="p">,</span> <span class="s1">&#39;ccpvdz&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="MSTOOpt.CrossOvers">
 <span class="sig-prename descclassname"><span class="pre">MSTOOpt.</span></span><span class="sig-name descname"><span class="pre">CrossOvers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pop</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MSTOOpt.CrossOvers" title="Link to this definition">¶</a></dt>
 <dd><p>Creates a population of molecules by crossovers from a given population.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="MSTOOpt.DumpStandardBasis">
+<span class="sig-prename descclassname"><span class="pre">MSTOOpt.</span></span><span class="sig-name descname"><span class="pre">DumpStandardBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MSTOOpt.DumpStandardBasis" title="Link to this definition">¶</a></dt>
+<dd><p>Create the molecule object for a molecule in a given basis and dump in a file. 
+A new file will be created only if it does not exist. 
+The format of the filename will be <cite>BS_&lt;element&gt;_&lt;basis&gt;.pickle</cite> and stored in the specified directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – A molecule defined in <a class="reference internal" href="#MSTOOpt.moldict" title="MSTOOpt.moldict"><code class="xref py py-func docutils literal notranslate"><span class="pre">MSTOOpt.moldict()</span></code></a>.</p></li>
+<li><p><strong>basis</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – A basis name defined in <cite>basis_set_exchange package</cite> for which the energy is to be computed.</p></li>
+<li><p><strong>dirname</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – The directory where the molecule object is to be dumped.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Example<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">DumpStandardBasis</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;sto-4g&#39;</span><span class="p">,</span> <span class="n">dirname</span><span class="o">=</span><span class="s1">&#39;./&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -122,6 +163,39 @@ documentation for details.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="MSTOOpt.LogicalRefinement">
+<span class="sig-prename descclassname"><span class="pre">MSTOOpt.</span></span><span class="sig-name descname"><span class="pre">LogicalRefinement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials_mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials_co</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MOBS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MSTOOpt.LogicalRefinement" title="Link to this definition">¶</a></dt>
+<dd><p>Refine the MSTO basis sets generated. For 3 &lt;= k &lt;= 11 if the FCI energy for a given k is larger than that for k-1, an optimization is performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pyscf.gto.mole.Mole</span></code>) – the <cite>pyscf</cite> molecule object</p></li>
+<li><p><strong>Nmax</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Population of candidates to consider in the optimization</p></li>
+<li><p><strong>trials</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – The number of generations to run</p></li>
+<li><p><strong>tol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Tolerance of energy for convergence</p></li>
+<li><p><strong>tol_mu</strong> – Number of mutations to consider under each trial</p></li>
+<li><p><strong>trials_co</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Number of crossovers to consider after each mutation</p></li>
+<li><p><strong>prefix</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> (optional. Defaults to <cite>MOBS</cite>)) – Prefix of the pickled database</p></li>
+<li><p><strong>dirname</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> (optional. Defaults to <cite>./</cite>)) – Directory to look for the dumped database files.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nothing</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Example<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">element</span> <span class="o">=</span> <span class="s1">&#39;H&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Nmax</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">LogicalRefinement</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">Nmax</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">,</span> <span class="n">trials_mu</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">trials_co</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;MOBS&#39;</span><span class="p">,</span> <span class="n">dirname</span><span class="o">=</span><span class="n">dirname</span><span class="p">,</span> <span class="n">klst</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="MSTOOpt.Mutate">
 <span class="sig-prename descclassname"><span class="pre">MSTOOpt.</span></span><span class="sig-name descname"><span class="pre">Mutate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MSTOOpt.Mutate" title="Link to this definition">¶</a></dt>
 <dd><p>Creates a population of molecules by mutations from a given population. Do not use this. Use <cite>Mutate_v2</cite> instead.</p>
@@ -135,14 +209,37 @@ documentation for details.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="MSTOOpt.OptimizeElement">
-<span class="sig-prename descclassname"><span class="pre">MSTOOpt.</span></span><span class="sig-name descname"><span class="pre">OptimizeElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials_mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials_co</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itermax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MSTOOpt.OptimizeElement" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">MSTOOpt.</span></span><span class="sig-name descname"><span class="pre">OptimizeElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials_mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials_co</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MSTOOpt.OptimizeElement" title="Link to this definition">¶</a></dt>
 <dd><p>Optimization of the basis set coefficients using a genetic algorithm-inspired approach. The differences will be noted upon updation of the document.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="MSTOOpt.OptimizeElement_vNW00">
-<span class="sig-prename descclassname"><span class="pre">MSTOOpt.</span></span><span class="sig-name descname"><span class="pre">OptimizeElement_vNW00</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials_mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials_co</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itermax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MSTOOpt.OptimizeElement_vNW00" title="Link to this definition">¶</a></dt>
-<dd><p>Optimization of the basis set coefficients using a genetic algorithm-inspired approach. This is a slow version for the problem at hand. Do not use this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pyscf.gto.mole.Mole</span></code>) – the <cite>pyscf</cite> molecule object</p></li>
+<li><p><strong>Nmax</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Population of candidates to consider in the optimization</p></li>
+<li><p><strong>fname</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – File where the optimized candidate is stored/updated.</p></li>
+<li><p><strong>trials</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – The number of generations to run</p></li>
+<li><p><strong>tol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Tolerance of energy for convergence</p></li>
+<li><p><strong>tol_mu</strong> – Number of mutations to consider under each trial</p></li>
+<li><p><strong>trials_co</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Number of crossovers to consider after each mutation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a tuple of (&lt;list of the final population&gt;, &lt;list of generations&gt;, &lt;list of best energy in each generation&gt;)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></p>
+</dd>
+<dt class="field-even">Example<span class="colon">:</span></dt>
+<dd class="field-even"><p></p></dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">element</span> <span class="o">=</span> <span class="s1">&#39;H&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">k</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dirname</span> <span class="o">=</span><span class="s1">&#39;./testdata&#39;</span> <span class="c1"># the best candidates will be stored here</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span> <span class="o">=</span> <span class="n">FetchBestMol</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">dirname</span><span class="o">=</span><span class="n">dirname</span><span class="p">)[</span><span class="s1">&#39;mol_FCI&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mol</span> <span class="c1"># fetch the best available candidate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s2">_msto-</span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">g.pickle&quot;</span><span class="p">)</span> <span class="c1"># the best candidate is pickled here</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pop2</span><span class="p">,</span> <span class="n">gen</span><span class="p">,</span> <span class="n">en</span> <span class="o">=</span> <span class="n">OptimizeElement</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">Nmax</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">,</span> <span class="n">trials_mu</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">trials_co</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">itermax</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span> <span class="c1"># optimize</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -387,13 +484,15 @@ Use this to improve the coefficients further.</p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.BasisReshape"><code class="docutils literal notranslate"><span class="pre">BasisReshape()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.CreateMoleculesStdBasisSets"><code class="docutils literal notranslate"><span class="pre">CreateMoleculesStdBasisSets()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.CrossOvers"><code class="docutils literal notranslate"><span class="pre">CrossOvers()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.DumpStandardBasis"><code class="docutils literal notranslate"><span class="pre">DumpStandardBasis()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.FetchBestMol"><code class="docutils literal notranslate"><span class="pre">FetchBestMol()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.GenerateInitialPopulation"><code class="docutils literal notranslate"><span class="pre">GenerateInitialPopulation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.LogicalRefinement"><code class="docutils literal notranslate"><span class="pre">LogicalRefinement()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.Mutate"><code class="docutils literal notranslate"><span class="pre">Mutate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.Mutate_v2"><code class="docutils literal notranslate"><span class="pre">Mutate_v2()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.OptimizeElement"><code class="docutils literal notranslate"><span class="pre">OptimizeElement()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.OptimizeElement_vNW00"><code class="docutils literal notranslate"><span class="pre">OptimizeElement_vNW00()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.dmol"><code class="docutils literal notranslate"><span class="pre">dmol()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.dumpBSI"><code class="docutils literal notranslate"><span class="pre">dumpBSI()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#MSTOOpt.getEnergies"><code class="docutils literal notranslate"><span class="pre">getEnergies()</span></code></a></li>

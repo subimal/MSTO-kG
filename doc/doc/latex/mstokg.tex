@@ -64,7 +64,7 @@
 
 
 \title{MSTOkG}
-\date{Oct 13, 2025}
+\date{Oct 14, 2025}
 \release{0.1}
 \author{Subimal Deb}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -170,6 +170,39 @@ This molecule object can now be used to optimize the basis set or compute the en
 
 \end{fulllineitems}
 
+\index{CreateMoleculesStdBasisSets() (in module MSTOOpt)@\spxentry{CreateMoleculesStdBasisSets()}\spxextra{in module MSTOOpt}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api:MSTOOpt.CreateMoleculesStdBasisSets}}
+\pysigstartsignatures
+\pysiglinewithargsret
+{\sphinxcode{\sphinxupquote{MSTOOpt.}}\sphinxbfcode{\sphinxupquote{CreateMoleculesStdBasisSets}}}
+{\sphinxparam{\DUrole{n}{molecules}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}H Li Be B C N O F H2 LiH HF\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{basissets}\DUrole{o}{=}\DUrole{default_value}{{[}\textquotesingle{}6\sphinxhyphen{}31g\textquotesingle{}, \textquotesingle{}ccpvdz\textquotesingle{}{]}}}}
+{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Batch creation of molecule objects from standard basis sets
+\begin{quote}\begin{description}
+\sphinxlineitem{Parameters}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{molecules}} (\sphinxcode{\sphinxupquote{str}}) \textendash{} A string of space separated molecules as specified in {\hyperref[\detokenize{api:MSTOOpt.moldict}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{MSTOOpt.moldict()}}}}}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{basissets}} (\sphinxcode{\sphinxupquote{list}}) \textendash{} A list of basis set names for which the molecule objects are computed.
+
+\end{itemize}
+
+\sphinxlineitem{Example}
+\end{description}\end{quote}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{CreateMoleculesStdBasisSets}\PYG{p}{(}\PYG{n}{molecules}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{H Li Be B C N O F H2 LiH HF}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{basissets}\PYG{o}{=}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{6\PYGZhy{}31g}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{ccpvdz}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+\end{sphinxVerbatim}
+
+\end{fulllineitems}
+
 \index{CrossOvers() (in module MSTOOpt)@\spxentry{CrossOvers()}\spxextra{in module MSTOOpt}}
 
 \begin{fulllineitems}
@@ -182,6 +215,45 @@ This molecule object can now be used to optimize the basis set or compute the en
 \pysigstopsignatures
 \sphinxAtStartPar
 Creates a population of molecules by crossovers from a given population.
+
+\end{fulllineitems}
+
+\index{DumpStandardBasis() (in module MSTOOpt)@\spxentry{DumpStandardBasis()}\spxextra{in module MSTOOpt}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api:MSTOOpt.DumpStandardBasis}}
+\pysigstartsignatures
+\pysiglinewithargsret
+{\sphinxcode{\sphinxupquote{MSTOOpt.}}\sphinxbfcode{\sphinxupquote{DumpStandardBasis}}}
+{\sphinxparam{\DUrole{n}{element}}\sphinxparamcomma \sphinxparam{\DUrole{n}{basis}}\sphinxparamcomma \sphinxparam{\DUrole{n}{dirname}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}./\textquotesingle{}}}}
+{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Create the molecule object for a molecule in a given basis and dump in a file. 
+A new file will be created only if it does not exist. 
+The format of the filename will be \sphinxtitleref{BS\_\textless{}element\textgreater{}\_\textless{}basis\textgreater{}.pickle} and stored in the specified directory.
+\begin{quote}\begin{description}
+\sphinxlineitem{Parameters}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{element}} (\sphinxcode{\sphinxupquote{str}}) \textendash{} A molecule defined in {\hyperref[\detokenize{api:MSTOOpt.moldict}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{MSTOOpt.moldict()}}}}}.
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{basis}} (\sphinxcode{\sphinxupquote{str}}) \textendash{} A basis name defined in \sphinxtitleref{basis\_set\_exchange package} for which the energy is to be computed.
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{dirname}} (\sphinxcode{\sphinxupquote{str}}) \textendash{} The directory where the molecule object is to be dumped.
+
+\end{itemize}
+
+\sphinxlineitem{Example}
+\end{description}\end{quote}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{DumpStandardBasis}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{H}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{sto\PYGZhy{}4g}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{dirname}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{./}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}
+\end{sphinxVerbatim}
 
 \end{fulllineitems}
 
@@ -249,6 +321,73 @@ Creates a population of molecules by mutations from a given molecule.
 
 \end{fulllineitems}
 
+\index{LogicalRefinement() (in module MSTOOpt)@\spxentry{LogicalRefinement()}\spxextra{in module MSTOOpt}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{api:MSTOOpt.LogicalRefinement}}
+\pysigstartsignatures
+\pysiglinewithargsret
+{\sphinxcode{\sphinxupquote{MSTOOpt.}}\sphinxbfcode{\sphinxupquote{LogicalRefinement}}}
+{\sphinxparam{\DUrole{n}{element}}\sphinxparamcomma \sphinxparam{\DUrole{n}{Nmax}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials}\DUrole{o}{=}\DUrole{default_value}{20}}\sphinxparamcomma \sphinxparam{\DUrole{n}{tol}\DUrole{o}{=}\DUrole{default_value}{1e\sphinxhyphen{}16}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials\_mu}\DUrole{o}{=}\DUrole{default_value}{15}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials\_co}\DUrole{o}{=}\DUrole{default_value}{20}}\sphinxparamcomma \sphinxparam{\DUrole{n}{prefix}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}MOBS\textquotesingle{}}}\sphinxparamcomma \sphinxparam{\DUrole{n}{dirname}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}./\textquotesingle{}}}}
+{}
+\pysigstopsignatures
+\sphinxAtStartPar
+Refine the MSTO basis sets generated. For 3 \textless{}= k \textless{}= 11 if the FCI energy for a given k is larger than that for k\sphinxhyphen{}1, an optimization is performed.
+\begin{quote}\begin{description}
+\sphinxlineitem{Parameters}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{mol}} (\sphinxcode{\sphinxupquote{pyscf.gto.mole.Mole}}) \textendash{} the \sphinxtitleref{pyscf} molecule object
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{Nmax}} (\sphinxcode{\sphinxupquote{int}}) \textendash{} Population of candidates to consider in the optimization
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{trials}} (\sphinxcode{\sphinxupquote{str}}) \textendash{} The number of generations to run
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{tol}} (\sphinxcode{\sphinxupquote{float}}) \textendash{} Tolerance of energy for convergence
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{tol\_mu}} \textendash{} Number of mutations to consider under each trial
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{trials\_co}} (\sphinxcode{\sphinxupquote{int}}) \textendash{} Number of crossovers to consider after each mutation
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{prefix}} (\sphinxcode{\sphinxupquote{str}} (optional. Defaults to \sphinxtitleref{MOBS})) \textendash{} Prefix of the pickled database
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{dirname}} (\sphinxcode{\sphinxupquote{str}} (optional. Defaults to \sphinxtitleref{./})) \textendash{} Directory to look for the dumped database files.
+
+\end{itemize}
+
+\sphinxlineitem{Returns}
+\sphinxAtStartPar
+Nothing
+
+\sphinxlineitem{Return type}
+\sphinxAtStartPar
+None
+
+\sphinxlineitem{Example}
+\end{description}\end{quote}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{element} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{H}\PYG{l+s+s1}{\PYGZsq{}}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{Nmax} \PYG{o}{=} \PYG{l+m+mi}{10}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{LogicalRefinement}\PYG{p}{(}\PYG{n}{element}\PYG{p}{,} \PYG{n}{Nmax}\PYG{p}{,} \PYG{n}{trials}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{,} \PYG{n}{tol}\PYG{o}{=}\PYG{l+m+mf}{1e\PYGZhy{}16}\PYG{p}{,} \PYG{n}{trials\PYGZus{}mu}\PYG{o}{=}\PYG{l+m+mi}{15}\PYG{p}{,} \PYG{n}{trials\PYGZus{}co}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{,} \PYG{n}{prefix} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{MOBS}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{dirname}\PYG{o}{=}\PYG{n}{dirname}\PYG{p}{,} \PYG{n}{klst}\PYG{o}{=}\PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{l+m+mi}{12}\PYG{p}{)}\PYG{p}{)}
+\end{sphinxVerbatim}
+
+\end{fulllineitems}
+
 \index{Mutate() (in module MSTOOpt)@\spxentry{Mutate()}\spxextra{in module MSTOOpt}}
 
 \begin{fulllineitems}
@@ -286,26 +425,62 @@ Creates a population of molecules by mutations from a given population.
 \pysigstartsignatures
 \pysiglinewithargsret
 {\sphinxcode{\sphinxupquote{MSTOOpt.}}\sphinxbfcode{\sphinxupquote{OptimizeElement}}}
-{\sphinxparam{\DUrole{n}{mol}}\sphinxparamcomma \sphinxparam{\DUrole{n}{Nmax}}\sphinxparamcomma \sphinxparam{\DUrole{n}{fname}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials}\DUrole{o}{=}\DUrole{default_value}{10}}\sphinxparamcomma \sphinxparam{\DUrole{n}{tol}\DUrole{o}{=}\DUrole{default_value}{1e\sphinxhyphen{}10}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials\_mu}\DUrole{o}{=}\DUrole{default_value}{100}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials\_co}\DUrole{o}{=}\DUrole{default_value}{100}}\sphinxparamcomma \sphinxparam{\DUrole{n}{itermax}\DUrole{o}{=}\DUrole{default_value}{10}}}
+{\sphinxparam{\DUrole{n}{mol}}\sphinxparamcomma \sphinxparam{\DUrole{n}{Nmax}}\sphinxparamcomma \sphinxparam{\DUrole{n}{fname}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials}\DUrole{o}{=}\DUrole{default_value}{10}}\sphinxparamcomma \sphinxparam{\DUrole{n}{tol}\DUrole{o}{=}\DUrole{default_value}{1e\sphinxhyphen{}10}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials\_mu}\DUrole{o}{=}\DUrole{default_value}{100}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials\_co}\DUrole{o}{=}\DUrole{default_value}{100}}}
 {}
 \pysigstopsignatures
 \sphinxAtStartPar
 Optimization of the basis set coefficients using a genetic algorithm\sphinxhyphen{}inspired approach. The differences will be noted upon updation of the document.
-
-\end{fulllineitems}
-
-\index{OptimizeElement\_vNW00() (in module MSTOOpt)@\spxentry{OptimizeElement\_vNW00()}\spxextra{in module MSTOOpt}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{api:MSTOOpt.OptimizeElement_vNW00}}
-\pysigstartsignatures
-\pysiglinewithargsret
-{\sphinxcode{\sphinxupquote{MSTOOpt.}}\sphinxbfcode{\sphinxupquote{OptimizeElement\_vNW00}}}
-{\sphinxparam{\DUrole{n}{mol}}\sphinxparamcomma \sphinxparam{\DUrole{n}{Nmax}}\sphinxparamcomma \sphinxparam{\DUrole{n}{facs}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials}\DUrole{o}{=}\DUrole{default_value}{10}}\sphinxparamcomma \sphinxparam{\DUrole{n}{tol}\DUrole{o}{=}\DUrole{default_value}{1e\sphinxhyphen{}10}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials\_mu}\DUrole{o}{=}\DUrole{default_value}{100}}\sphinxparamcomma \sphinxparam{\DUrole{n}{trials\_co}\DUrole{o}{=}\DUrole{default_value}{100}}\sphinxparamcomma \sphinxparam{\DUrole{n}{itermax}\DUrole{o}{=}\DUrole{default_value}{10}}}
-{}
-\pysigstopsignatures
+\begin{quote}\begin{description}
+\sphinxlineitem{Parameters}\begin{itemize}
+\item {} 
 \sphinxAtStartPar
-Optimization of the basis set coefficients using a genetic algorithm\sphinxhyphen{}inspired approach. This is a slow version for the problem at hand. Do not use this.
+\sphinxstyleliteralstrong{\sphinxupquote{mol}} (\sphinxcode{\sphinxupquote{pyscf.gto.mole.Mole}}) \textendash{} the \sphinxtitleref{pyscf} molecule object
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{Nmax}} (\sphinxcode{\sphinxupquote{int}}) \textendash{} Population of candidates to consider in the optimization
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{fname}} (\sphinxcode{\sphinxupquote{str}}) \textendash{} File where the optimized candidate is stored/updated.
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{trials}} (\sphinxcode{\sphinxupquote{str}}) \textendash{} The number of generations to run
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{tol}} (\sphinxcode{\sphinxupquote{float}}) \textendash{} Tolerance of energy for convergence
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{tol\_mu}} \textendash{} Number of mutations to consider under each trial
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{trials\_co}} (\sphinxcode{\sphinxupquote{int}}) \textendash{} Number of crossovers to consider after each mutation
+
+\end{itemize}
+
+\sphinxlineitem{Returns}
+\sphinxAtStartPar
+a tuple of (\textless{}list of the final population\textgreater{}, \textless{}list of generations\textgreater{}, \textless{}list of best energy in each generation\textgreater{})
+
+\sphinxlineitem{Return type}
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{tuple}}
+
+\sphinxlineitem{Example}
+\end{description}\end{quote}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{element} \PYG{o}{=} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{H}\PYG{l+s+s1}{\PYGZsq{}}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{k} \PYG{o}{=} \PYG{l+m+mi}{2}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{dirname} \PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{./testdata}\PYG{l+s+s1}{\PYGZsq{}} \PYG{c+c1}{\PYGZsh{} the best candidates will be stored here}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{mol} \PYG{o}{=} \PYG{n}{FetchBestMol}\PYG{p}{(}\PYG{n}{element}\PYG{p}{,} \PYG{n}{k}\PYG{p}{,} \PYG{n}{dirname}\PYG{o}{=}\PYG{n}{dirname}\PYG{p}{)}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{mol\PYGZus{}FCI}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{mol} \PYG{c+c1}{\PYGZsh{} fetch the best available candidate}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{fname} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{join}\PYG{p}{(}\PYG{n}{dirname}\PYG{p}{,} \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{prefix}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZus{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{element}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZus{}msto\PYGZhy{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{k}\PYG{l+s+si}{:}\PYG{l+s+s2}{02d}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{g.pickle}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)} \PYG{c+c1}{\PYGZsh{} the best candidate is pickled here}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{pop2}\PYG{p}{,} \PYG{n}{gen}\PYG{p}{,} \PYG{n}{en} \PYG{o}{=} \PYG{n}{OptimizeElement}\PYG{p}{(}\PYG{n}{mol}\PYG{p}{,} \PYG{n}{Nmax}\PYG{p}{,} \PYG{n}{fname}\PYG{p}{,} \PYG{n}{trials}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{,} \PYG{n}{tol}\PYG{o}{=}\PYG{l+m+mf}{1e\PYGZhy{}16}\PYG{p}{,} \PYG{n}{trials\PYGZus{}mu}\PYG{o}{=}\PYG{l+m+mi}{15}\PYG{p}{,} \PYG{n}{trials\PYGZus{}co}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{,} \PYG{n}{itermax}\PYG{o}{=}\PYG{l+m+mi}{15}\PYG{p}{)} \PYG{c+c1}{\PYGZsh{} optimize}
+\end{sphinxVerbatim}
 
 \end{fulllineitems}
 

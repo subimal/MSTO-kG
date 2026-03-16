@@ -67,7 +67,7 @@
 \title{MSTOkG}
 \date{Mar 13, 2026}
 \release{0.1}
-\author{Subimal Deb}
+\author{Subimal Deb, V.\@{} S.\@{} Prasannaa}
 \newcommand{\sphinxlogo}{\vbox{}}
 \renewcommand{\releasename}{Release}
 \makeindex
@@ -267,7 +267,26 @@ Batch creation of molecule objects from standard basis sets
 {}
 \pysigstopsignatures
 \sphinxAtStartPar
-Creates a population of molecules by crossovers from a given population.
+Creates a new population of molecules using discrete parameter crossovers.
+
+\sphinxAtStartPar
+Iterates through pairs of parent molecules and swaps basis set
+parameters based on a random binary template. This allows the
+offspring to inherit specific shells from different parents.
+\begin{quote}\begin{description}
+\sphinxlineitem{Parameters}
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{pop}} (\sphinxstyleliteralemphasis{\sphinxupquote{list}}) \textendash{} A list of {[}energy, molecule{]} pairs representing the current population.
+
+\sphinxlineitem{Returns}
+\sphinxAtStartPar
+A list of new {[}energy, molecule{]} pairs generated via crossover.
+
+\sphinxlineitem{Return type}
+\sphinxAtStartPar
+list
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -343,6 +362,9 @@ MSTO\sphinxhyphen{}(k\sphinxhyphen{}1)G
 STO\sphinxhyphen{}(k\sphinxhyphen{}1)G
 
 \item {} 
+\sphinxAtStartPar
+..etc.
+
 \end{itemize}
 
 \sphinxAtStartPar
@@ -452,7 +474,40 @@ None
 {}
 \pysigstopsignatures
 \sphinxAtStartPar
-Creates a population of molecules by mutations from a given population. Do not use this. Use \sphinxtitleref{Mutate\_v2} instead.
+Creates a population of molecules by applying random fluctuations to the best candidate.
+
+\begin{sphinxadmonition}{note}{Note:}
+\sphinxAtStartPar
+This function is deprecated. Using {\hyperref[\detokenize{api:MSTOOptpar.Mutate_v2}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{Mutate\_v2()}}}}} is preferred as it
+utilizes parameter gradients between individuals for more efficient exploration.
+\end{sphinxadmonition}
+
+\sphinxAtStartPar
+This operator takes the current best candidate and generates new individuals
+by perturbing basis set parameters and geometry using the {\hyperref[\detokenize{api:MSTOOptpar.dmol}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{dmol()}}}}} function.
+The population is updated if a mutant achieves a lower CISD energy than the
+existing best candidate.
+\begin{quote}\begin{description}
+\sphinxlineitem{Parameters}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{pop}} (\sphinxstyleliteralemphasis{\sphinxupquote{list}}) \textendash{} Current population of {[}energy, molecule{]} pairs.
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{facs}} (\sphinxstyleliteralemphasis{\sphinxupquote{list}}) \textendash{} A tuple/list containing (basis\_perturbation\_factor, geometry\_perturbation\_factor).
+
+\end{itemize}
+
+\sphinxlineitem{Returns}
+\sphinxAtStartPar
+The updated population sorted by energy.
+
+\sphinxlineitem{Return type}
+\sphinxAtStartPar
+list
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -467,7 +522,39 @@ Creates a population of molecules by mutations from a given population. Do not u
 {}
 \pysigstopsignatures
 \sphinxAtStartPar
-Creates a population of molecules by mutations from a given population.
+Creates a population of molecules using interpolative mutations between individuals.
+
+\begin{sphinxadmonition}{note}{Note:}
+\sphinxAtStartPar
+This is the preferred mutation operator for MSTO optimization.
+\end{sphinxadmonition}
+
+\sphinxAtStartPar
+Unlike standard random mutation, this version calculates a “parameter gradient”
+between two existing individuals in the population. It then shifts
+the parameters of the better individual toward the other by a randomized
+fraction, allowing for a more directed search of the parameter space.
+\begin{quote}\begin{description}
+\sphinxlineitem{Parameters}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{pop}} (\sphinxstyleliteralemphasis{\sphinxupquote{list}}) \textendash{} Current population of {[}energy, molecule{]} pairs.
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{facs}} (\sphinxstyleliteralemphasis{\sphinxupquote{list}}) \textendash{} A list containing the scaling factor for the mutation step size.
+
+\end{itemize}
+
+\sphinxlineitem{Returns}
+\sphinxAtStartPar
+The updated population containing successful mutants.
+
+\sphinxlineitem{Return type}
+\sphinxAtStartPar
+list
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -547,7 +634,36 @@ tuple
 {}
 \pysigstopsignatures
 \sphinxAtStartPar
-Creates a molecule with a modified basis (by random changes to the basis set and bond length parameters).
+Creates a new molecule object with randomized basis parameters and geometry.
+
+\sphinxAtStartPar
+This function acts as a high\sphinxhyphen{}level mutation operator, perturbing both
+the basis set exponents/coefficients and the atomic coordinates.
+\begin{quote}\begin{description}
+\sphinxlineitem{Parameters}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{mol}} (\sphinxstyleliteralemphasis{\sphinxupquote{pyscf.gto.mole.Mole}}) \textendash{} The template PySCF molecule object.
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{fac\_basis}} (\sphinxstyleliteralemphasis{\sphinxupquote{float}}) \textendash{} Scaling factor for basis set perturbations.
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{fac\_r}} (\sphinxstyleliteralemphasis{\sphinxupquote{float}}) \textendash{} Scaling factor for atomic coordinate perturbations.
+
+\end{itemize}
+
+\sphinxlineitem{Returns}
+\sphinxAtStartPar
+A deep copy of the molecule with modified parameters.
+
+\sphinxlineitem{Return type}
+\sphinxAtStartPar
+pyscf.gto.mole.Mole
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -562,26 +678,23 @@ Creates a molecule with a modified basis (by random changes to the basis set and
 {}
 \pysigstopsignatures
 \sphinxAtStartPar
-An instance of the computed basis sets can be dumped as a pickle file. It will be useful if one wishes to reuse these values for further improvement.
+Dumps a computed basis set results instance into a pickle file.
+
+\sphinxAtStartPar
+Useful for checkpointing the Memetic Algorithm or saving the
+best candidate for further aggressive refinement.
 \begin{quote}\begin{description}
 \sphinxlineitem{Parameters}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\sphinxstyleliteralstrong{\sphinxupquote{BSI\_instance}} (Prefereably {\hyperref[\detokenize{api:MSTOOptpar.getEnergies}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{getEnergies}}}}}. (\sphinxstyleemphasis{Note:} It will not raise an error otherwise.)) \textendash{} The python object that will be pickled for easy retrieval later. This is used internally as the {\hyperref[\detokenize{api:MSTOOptpar.getEnergies}]{\sphinxcrossref{\sphinxcode{\sphinxupquote{getEnergies}}}}} object for the optimized basis set. The “BSI” stands for basis set improved.
+\sphinxstyleliteralstrong{\sphinxupquote{BSI\_instance}} (\sphinxstyleliteralemphasis{\sphinxupquote{dict}}) \textendash{} The dictionary returned by getEnergies containing
+‘HF’, ‘CISD’, and the molecule object.
 
 \item {} 
 \sphinxAtStartPar
-\sphinxstyleliteralstrong{\sphinxupquote{fname}} (\sphinxcode{\sphinxupquote{str}}) \textendash{} The filename where the pickled object will be dumped.
+\sphinxstyleliteralstrong{\sphinxupquote{fname}} (\sphinxstyleliteralemphasis{\sphinxupquote{str}}) \textendash{} The output filename.
 
 \end{itemize}
-
-\sphinxlineitem{Returns}
-\sphinxAtStartPar
-Nothing
-
-\sphinxlineitem{Return type}
-\sphinxAtStartPar
-None
 
 \end{description}\end{quote}
 
@@ -599,7 +712,7 @@ None
 \pysigstopsignatures
 \sphinxAtStartPar
 Retrieve the Hartree\sphinxhyphen{}Fock, FCI, and CISD energies for a molecule.
-The method ensures the molecule object is built locally to maintain 
+The method ensures the molecule object is built locally to maintain
 consistency in parallel environments.
 \begin{quote}\begin{description}
 \sphinxlineitem{Parameters}\begin{itemize}
@@ -609,7 +722,7 @@ consistency in parallel environments.
 
 \item {} 
 \sphinxAtStartPar
-\sphinxstyleliteralstrong{\sphinxupquote{nroots}} (\sphinxstyleliteralemphasis{\sphinxupquote{int}}\sphinxstyleliteralemphasis{\sphinxupquote{, }}\sphinxstyleliteralemphasis{\sphinxupquote{defaults to 4.}}) \textendash{} Number of roots for the FCI solver.
+\sphinxstyleliteralstrong{\sphinxupquote{nroots}} (\sphinxstyleliteralemphasis{\sphinxupquote{int}}\sphinxstyleliteralemphasis{\sphinxupquote{, }}\sphinxstyleliteralemphasis{\sphinxupquote{defaults to 4.}}) \textendash{} Number of roots for the FCI and CI solvers.
 
 \item {} 
 \sphinxAtStartPar
@@ -623,11 +736,40 @@ consistency in parallel environments.
 
 \sphinxlineitem{Returns}
 \sphinxAtStartPar
-Dictionary containing ‘HF’, ‘FCI’, and ‘CISD’ energies.
+A dictionary containing computed energies and converged PySCF objects.
 
 \sphinxlineitem{Return type}
 \sphinxAtStartPar
+
+\sphinxAtStartPar
 dict
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{HF}: Total Hartree\sphinxhyphen{}Fock energy (float).
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{mol\_HF}: The converged Restricted Hartree\sphinxhyphen{}Fock (RHF) mean\sphinxhyphen{}field object.
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{FCI}: List of FCI root energies (if fci=True).
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{mol\_FCI}: The PySCF FCI solver object (if fci=True).
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{CISD}: Total CISD energy of the first root (float).
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{mol\_CISD}: The converged PySCF CISD object.
+
+\end{itemize}
+
 
 \sphinxlineitem{Example}
 \end{description}\end{quote}
@@ -635,8 +777,8 @@ dict
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{mol} \PYG{o}{=} \PYG{n}{moldict}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{sto\PYGZhy{}3g}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{H2}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}
 \PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n}{energies} \PYG{o}{=} \PYG{n}{getEnergies}\PYG{p}{(}\PYG{n}{mol}\PYG{p}{,} \PYG{n}{cisd}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
-\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n+nb}{print}\PYG{p}{(}\PYG{n}{energies}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
-\PYG{g+go}{\PYGZhy{}1.11671432537233}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{HF Energy: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{energies}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{HF}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+\PYG{g+gp}{\PYGZgt{}\PYGZgt{}\PYGZgt{} }\PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{CISD Energy: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{energies}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
 \end{sphinxVerbatim}
 
 \end{fulllineitems}
@@ -846,10 +988,157 @@ numpy.ndarray
 {}
 \pysigstopsignatures
 \sphinxAtStartPar
-Add randomized fluctuations to the array by a defined factor.
+Add randomized fluctuations to a NumPy array by a defined factor.
+
+\sphinxAtStartPar
+This is used to introduce diversity in basis set parameters by
+perturbing exponents or coefficients.
+\begin{quote}\begin{description}
+\sphinxlineitem{Parameters}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{a}} (\sphinxstyleliteralemphasis{\sphinxupquote{numpy.ndarray}}) \textendash{} The input array (e.g., basis set coefficients).
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstyleliteralstrong{\sphinxupquote{fac}} (\sphinxstyleliteralemphasis{\sphinxupquote{float}}) \textendash{} The fluctuation scaling factor.
+
+\end{itemize}
+
+\sphinxlineitem{Returns}
+\sphinxAtStartPar
+Perturbed array with values scaled by (1 + fac * random\_offset).
+
+\sphinxlineitem{Return type}
+\sphinxAtStartPar
+numpy.ndarray
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
+
+\sphinxstepscope
+
+
+\chapter{Building the dataset}
+\label{\detokenize{mkmsto:building-the-dataset}}\label{\detokenize{mkmsto::doc}}
+\sphinxAtStartPar
+This is the code that has been used to build the MSTO\sphinxhyphen{}KG basis sets.
+\sphinxSetupCaptionForVerbatim{Computing the MSTO\sphinxhyphen{}\$K\$G basis sets}
+\def\sphinxLiteralBlockLabel{\label{\detokenize{mkmsto:id1}}}
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{os}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{numpy}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n+nn}{np}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{sys}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{logging}
+\PYG{k+kn}{import}\PYG{+w}{ }\PYG{n+nn}{csv}
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{datetime}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{datetime}
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{copy}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{deepcopy}
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{joblib}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{n}{Parallel}\PYG{p}{,} \PYG{n}{delayed}
+
+\PYG{c+c1}{\PYGZsh{} Import your quantum chemistry modules}
+\PYG{k+kn}{from}\PYG{+w}{ }\PYG{n+nn}{MSTOkG}\PYG{n+nn}{.}\PYG{n+nn}{MSTOOptpar}\PYG{+w}{ }\PYG{k+kn}{import} \PYG{o}{*}
+
+
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{getonecandidate\PYGZus{}local}\PYG{p}{(}\PYG{n}{candidate}\PYG{p}{,} \PYG{n}{fac}\PYG{o}{=}\PYG{l+m+mf}{1e\PYGZhy{}1}\PYG{p}{)}\PYG{p}{:}
+    \PYG{k}{try}\PYG{p}{:}
+        \PYG{n}{mol} \PYG{o}{=} \PYG{n}{candidate}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{mol\PYGZus{}CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{mol}
+        \PYG{n}{fac\PYGZus{}basis}\PYG{p}{,} \PYG{n}{fac\PYGZus{}r} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{random}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{*}\PYG{n}{fac}
+        \PYG{n}{mol1} \PYG{o}{=} \PYG{n}{dmol}\PYG{p}{(}\PYG{n}{mol}\PYG{p}{,} \PYG{n}{fac\PYGZus{}basis}\PYG{p}{,} \PYG{n}{fac\PYGZus{}r}\PYG{p}{)}
+        \PYG{n}{en} \PYG{o}{=} \PYG{n}{getEnergies}\PYG{p}{(}\PYG{n}{mol1}\PYG{p}{,} \PYG{n}{nroots}\PYG{o}{=}\PYG{l+m+mi}{4}\PYG{p}{,} \PYG{n}{fci}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{cisd}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+        \PYG{k}{return} \PYG{n}{en}
+    \PYG{k}{except} \PYG{n+ne}{Exception}\PYG{p}{:}
+        \PYG{k}{return} \PYG{k+kc}{None}
+
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{AggressiveRefinement\PYGZus{}v2}\PYG{p}{(}\PYG{n}{mol}\PYG{p}{,} \PYG{n}{fname}\PYG{p}{,} \PYG{n}{shots}\PYG{o}{=}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{n}{tol}\PYG{o}{=}\PYG{l+m+mf}{1e\PYGZhy{}8}\PYG{p}{,} \PYG{n}{itermax}\PYG{o}{=}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{n}{n}\PYG{o}{=}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{n}{passes}\PYG{o}{=}\PYG{l+m+mi}{5}\PYG{p}{,} \PYG{n}{mu}\PYG{o}{=}\PYG{l+m+mi}{50}\PYG{p}{,} \PYG{n}{ncores}\PYG{o}{=}\PYG{l+m+mi}{10}\PYG{p}{)}\PYG{p}{:}
+    \PYG{n}{en\PYGZus{}data} \PYG{o}{=} \PYG{n}{getEnergies}\PYG{p}{(}\PYG{n}{mol}\PYG{p}{,} \PYG{n}{nroots}\PYG{o}{=}\PYG{l+m+mi}{4}\PYG{p}{,} \PYG{n}{fci}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{cisd}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+    \PYG{n}{en0\PYGZus{}val} \PYG{o}{=} \PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}
+    \PYG{n}{facs} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{o}{/}\PYG{l+m+mi}{10}\PYG{o}{*}\PYG{o}{*}\PYG{n}{np}\PYG{o}{.}\PYG{n}{arange}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{n}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{)}
+    \PYG{n}{err} \PYG{o}{=} \PYG{l+m+mf}{1e9}
+    \PYG{n}{n\PYGZus{}cores} \PYG{o}{=} \PYG{n}{ncores}
+
+    \PYG{c+c1}{\PYGZsh{} Initialize CSV}
+    \PYG{k}{with} \PYG{n+nb}{open}\PYG{p}{(}\PYG{n}{csv\PYGZus{}filename}\PYG{p}{,} \PYG{n}{mode}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{w}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{newline}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)} \PYG{k}{as} \PYG{n}{f}\PYG{p}{:}
+        \PYG{n}{writer} \PYG{o}{=} \PYG{n}{csv}\PYG{o}{.}\PYG{n}{writer}\PYG{p}{(}\PYG{n}{f}\PYG{p}{)}
+        \PYG{n}{writer}\PYG{o}{.}\PYG{n}{writerow}\PYG{p}{(}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Timestamp}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Pass}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Fac}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Iteration}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Tasks\PYGZus{}Finished}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD\PYGZus{}Energy}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{Error}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+
+    \PYG{n}{passno} \PYG{o}{=} \PYG{l+m+mi}{0}
+    \PYG{k}{while} \PYG{n}{passno}\PYG{o}{\PYGZlt{}}\PYG{n}{passes}\PYG{p}{:}
+        \PYG{k}{for} \PYG{n}{fac\PYGZus{}idx}\PYG{p}{,} \PYG{n}{fac} \PYG{o+ow}{in} \PYG{n+nb}{enumerate}\PYG{p}{(}\PYG{n}{facs}\PYG{p}{)}\PYG{p}{:}
+            \PYG{k}{for} \PYG{n}{shot} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{shots}\PYG{p}{)}\PYG{p}{:}
+                
+                \PYG{n}{Improved} \PYG{o}{=} \PYG{k+kc}{True}
+                \PYG{n}{iters} \PYG{o}{=} \PYG{l+m+mi}{0}
+                \PYG{k}{while} \PYG{n}{Improved} \PYG{o+ow}{and} \PYG{n}{err} \PYG{o}{\PYGZgt{}} \PYG{n}{tol} \PYG{o+ow}{and} \PYG{n}{iters} \PYG{o}{\PYGZlt{}} \PYG{n}{itermax}\PYG{p}{:}
+                    \PYG{n}{faci} \PYG{o}{=} \PYG{n}{fac} \PYG{o}{*} \PYG{n}{np}\PYG{o}{.}\PYG{n}{random}\PYG{o}{.}\PYG{n}{random}\PYG{p}{(}\PYG{p}{)}
+                    \PYG{n}{Improved} \PYG{o}{=} \PYG{k+kc}{False}
+                    \PYG{c+c1}{\PYGZsh{} total\PYGZus{}tasks = shots * mu}
+                    \PYG{n}{total\PYGZus{}tasks} \PYG{o}{=}  \PYG{n}{mu}
+                    
+                    \PYG{n}{tasks} \PYG{o}{=} \PYG{p}{(}\PYG{n}{delayed}\PYG{p}{(}\PYG{n}{getonecandidate\PYGZus{}local}\PYG{p}{)}\PYG{p}{(}\PYG{n}{en\PYGZus{}data}\PYG{p}{,} \PYG{n}{fac}\PYG{o}{=}\PYG{n}{faci}\PYG{p}{)} \PYG{k}{for} \PYG{n}{\PYGZus{}} \PYG{o+ow}{in} \PYG{n+nb}{range}\PYG{p}{(}\PYG{n}{total\PYGZus{}tasks}\PYG{p}{)}\PYG{p}{)}
+                    \PYG{n}{joblib\PYGZus{}generator} \PYG{o}{=} \PYG{n}{Parallel}\PYG{p}{(}\PYG{n}{n\PYGZus{}jobs}\PYG{o}{=}\PYG{n}{n\PYGZus{}cores}\PYG{p}{,} \PYG{n}{return\PYGZus{}as}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{generator}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}\PYG{p}{(}\PYG{n}{tasks}\PYG{p}{)}
+    
+                    \PYG{n}{tasks\PYGZus{}finished} \PYG{o}{=} \PYG{l+m+mi}{0}
+                    \PYG{k}{for} \PYG{n}{result} \PYG{o+ow}{in} \PYG{n}{joblib\PYGZus{}generator}\PYG{p}{:}
+                        \PYG{n}{tasks\PYGZus{}finished} \PYG{o}{+}\PYG{o}{=} \PYG{l+m+mi}{1}
+                        
+                        \PYG{k}{if} \PYG{n}{result} \PYG{o+ow}{is} \PYG{o+ow}{not} \PYG{k+kc}{None}\PYG{p}{:}
+                            \PYG{k}{if} \PYG{n}{result}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]} \PYG{o}{\PYGZlt{}} \PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{:}
+                                \PYG{n}{en\PYGZus{}data} \PYG{o}{=} \PYG{n}{result}
+                                \PYG{n}{Improved} \PYG{o}{=} \PYG{k+kc}{True}
+                                \PYG{n}{dumpBSI}\PYG{p}{(}\PYG{n}{deepcopy}\PYG{p}{(}\PYG{n}{getEnergies}\PYG{p}{(}\PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{mol\PYGZus{}CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{o}{.}\PYG{n}{mol}\PYG{p}{,} \PYG{n}{fci}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}\PYG{p}{)}\PYG{p}{,} \PYG{n}{fname}\PYG{o}{=}\PYG{n}{fname}\PYG{p}{)}
+                                \PYG{n}{err} \PYG{o}{=} \PYG{n}{np}\PYG{o}{.}\PYG{n}{abs}\PYG{p}{(}\PYG{n}{en0\PYGZus{}val} \PYG{o}{\PYGZhy{}} \PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{)}
+                                \PYG{n}{en0\PYGZus{}val} \PYG{o}{=} \PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}
+                                
+                                \PYG{c+c1}{\PYGZsh{} Log improvement to the .log file}
+                                \PYG{n}{logging}\PYG{o}{.}\PYG{n}{info}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{IMPROVEMENT: Pass }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{passno}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{, Iter }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{iters}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | New Energy: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{:}\PYG{l+s+s2}{.10f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+                                
+                                \PYG{c+c1}{\PYGZsh{} Log to CSV for plotting later}
+                                \PYG{k}{with} \PYG{n+nb}{open}\PYG{p}{(}\PYG{n}{csv\PYGZus{}filename}\PYG{p}{,} \PYG{n}{mode}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{a}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{newline}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)} \PYG{k}{as} \PYG{n}{f}\PYG{p}{:}
+                                    \PYG{n}{writer} \PYG{o}{=} \PYG{n}{csv}\PYG{o}{.}\PYG{n}{writer}\PYG{p}{(}\PYG{n}{f}\PYG{p}{)}
+                                    \PYG{n}{writer}\PYG{o}{.}\PYG{n}{writerow}\PYG{p}{(}\PYG{p}{[}\PYG{n}{datetime}\PYG{o}{.}\PYG{n}{now}\PYG{p}{(}\PYG{p}{)}\PYG{p}{,} \PYG{n}{passno}\PYG{p}{,} \PYG{n}{faci}\PYG{p}{,} \PYG{n}{iters}\PYG{p}{,} \PYG{n}{tasks\PYGZus{}finished}\PYG{p}{,} \PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{p}{,} \PYG{n}{err}\PYG{p}{]}\PYG{p}{)}
+                                \PYG{c+c1}{\PYGZsh{} iters=max([0,iters\PYGZhy{}1])}
+                                \PYG{c+c1}{\PYGZsh{} Terminal Progress Update (Status Bar)}
+                                \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{element}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | k = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{k}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | Pass }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{passno}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ shot: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{shot}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | Progress: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{tasks\PYGZus{}finished}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{total\PYGZus{}tasks}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | Best E: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{:}\PYG{l+s+s2}{.10f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | fac: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{faci}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | err: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{err}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4g}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{n}{end}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}r}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{flush}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+    
+                        \PYG{c+c1}{\PYGZsh{} Terminal Progress Update (Status Bar)}
+                        \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{element}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | k = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{k}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | Pass }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{passno}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ shot: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{shot}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | Progress: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{tasks\PYGZus{}finished}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{total\PYGZus{}tasks}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | Best E: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{:}\PYG{l+s+s2}{.10f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | fac: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{faci}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | err: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{err}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4g}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{n}{end}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}r}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{flush}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+                    
+                    \PYG{n+nb}{print}\PYG{p}{(}\PYG{p}{)}
+                    \PYG{n}{logging}\PYG{o}{.}\PYG{n}{info}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Finished Iteration }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{iters}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ of Pass }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{passno}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+                    \PYG{n}{iters} \PYG{o}{+}\PYG{o}{=} \PYG{l+m+mi}{1}
+        \PYG{n+nb}{print}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{element}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | k = }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{k}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | Pass }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{passno}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ shot: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{shot}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | Progress: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{tasks\PYGZus{}finished}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{total\PYGZus{}tasks}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | Best E: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{en\PYGZus{}data}\PYG{p}{[}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{CISD}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{]}\PYG{l+s+si}{:}\PYG{l+s+s2}{.10f}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | fac: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{faci}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ | err: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{err}\PYG{l+s+si}{:}\PYG{l+s+s2}{.4g}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{n}{end}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+se}{\PYGZbs{}r}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,} \PYG{n}{flush}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+        \PYG{n}{passno} \PYG{o}{=}\PYG{n}{passno}\PYG{o}{+}\PYG{l+m+mi}{1}
+    \PYG{n+nb}{print}\PYG{p}{(}\PYG{p}{)}
+
+\PYG{k}{if} \PYG{n+nv+vm}{\PYGZus{}\PYGZus{}name\PYGZus{}\PYGZus{}} \PYG{o}{==} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{\PYGZus{}\PYGZus{}main\PYGZus{}\PYGZus{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{:}
+
+    \PYG{n}{element} \PYG{o}{=} \PYG{n}{sys}\PYG{o}{.}\PYG{n}{argv}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}
+
+    \PYG{c+c1}{\PYGZsh{} \PYGZhy{}\PYGZhy{}\PYGZhy{} Setup Logging \PYGZhy{}\PYGZhy{}\PYGZhy{}}
+    \PYG{n}{log\PYGZus{}filename} \PYG{o}{=} \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{refinement\PYGZus{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{element}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZus{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{datetime}\PYG{o}{.}\PYG{n}{now}\PYG{p}{(}\PYG{p}{)}\PYG{o}{.}\PYG{n}{strftime}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{Y}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{m}\PYG{l+s+si}{\PYGZpc{}d}\PYG{l+s+s1}{\PYGZus{}}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{H}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{M}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{S}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{.log}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{n}{csv\PYGZus{}filename} \PYG{o}{=} \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{convergence\PYGZus{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{element}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZus{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{datetime}\PYG{o}{.}\PYG{n}{now}\PYG{p}{(}\PYG{p}{)}\PYG{o}{.}\PYG{n}{strftime}\PYG{p}{(}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{Y}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{m}\PYG{l+s+si}{\PYGZpc{}d}\PYG{l+s+s1}{\PYGZus{}}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{H}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{M}\PYG{l+s+s1}{\PYGZpc{}}\PYG{l+s+s1}{S}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{)}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{.csv}\PYG{l+s+s2}{\PYGZdq{}}
+    
+    \PYG{n}{logging}\PYG{o}{.}\PYG{n}{basicConfig}\PYG{p}{(}
+        \PYG{n}{level}\PYG{o}{=}\PYG{n}{logging}\PYG{o}{.}\PYG{n}{INFO}\PYG{p}{,}
+        \PYG{n+nb}{format}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}}\PYG{l+s+si}{\PYGZpc{}(asctime)s}\PYG{l+s+s1}{ [}\PYG{l+s+si}{\PYGZpc{}(levelname)s}\PYG{l+s+s1}{] }\PYG{l+s+si}{\PYGZpc{}(message)s}\PYG{l+s+s1}{\PYGZsq{}}\PYG{p}{,}
+        \PYG{n}{handlers}\PYG{o}{=}\PYG{p}{[}\PYG{n}{logging}\PYG{o}{.}\PYG{n}{FileHandler}\PYG{p}{(}\PYG{n}{log\PYGZus{}filename}\PYG{p}{)}\PYG{p}{,} \PYG{n}{logging}\PYG{o}{.}\PYG{n}{StreamHandler}\PYG{p}{(}\PYG{n}{sys}\PYG{o}{.}\PYG{n}{stdout}\PYG{p}{)}\PYG{p}{]}
+    \PYG{p}{)}
+    \PYG{n}{dirname} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{./data/}\PYG{l+s+s2}{\PYGZdq{}}
+    \PYG{k}{if} \PYG{n+nb}{len}\PYG{p}{(}\PYG{n}{sys}\PYG{o}{.}\PYG{n}{argv}\PYG{p}{)}\PYG{o}{\PYGZgt{}}\PYG{l+m+mi}{2}\PYG{p}{:}
+        \PYG{n}{klst} \PYG{o}{=} \PYG{p}{[}\PYG{n+nb}{int}\PYG{p}{(}\PYG{n}{k}\PYG{p}{)} \PYG{k}{for} \PYG{n}{k} \PYG{o+ow}{in} \PYG{n}{sys}\PYG{o}{.}\PYG{n}{argv}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{:}\PYG{p}{]}\PYG{p}{]}
+    \PYG{k}{else}\PYG{p}{:}
+        \PYG{n}{klst} \PYG{o}{=} \PYG{n+nb}{range}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{l+m+mi}{12}\PYG{p}{)}
+    \PYG{k}{for} \PYG{n}{k} \PYG{o+ow}{in} \PYG{n}{klst}\PYG{p}{:}
+        \PYG{n}{fname} \PYG{o}{=} \PYG{n}{os}\PYG{o}{.}\PYG{n}{path}\PYG{o}{.}\PYG{n}{join}\PYG{p}{(}\PYG{n}{dirname}\PYG{p}{,} \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{MOBS\PYGZus{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{element}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZus{}msto\PYGZhy{}}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{k}\PYG{l+s+si}{:}\PYG{l+s+s2}{02d}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{g.pickle}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+        \PYG{n}{mol} \PYG{o}{=} \PYG{n}{FetchBestMol}\PYG{p}{(}\PYG{n}{element}\PYG{p}{,} \PYG{n}{k}\PYG{p}{,} \PYG{n}{dirname}\PYG{o}{=}\PYG{n}{dirname}\PYG{p}{)}
+        
+        \PYG{n}{logging}\PYG{o}{.}\PYG{n}{info}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Starting refinement for }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{element}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{ (k=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{k}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{)}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+        \PYG{n}{AggressiveRefinement\PYGZus{}v2}\PYG{p}{(}\PYG{n}{mol}\PYG{p}{,} \PYG{n}{fname}\PYG{p}{,} \PYG{n}{shots}\PYG{o}{=}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{tol}\PYG{o}{=}\PYG{l+m+mf}{1e\PYGZhy{}8}\PYG{p}{,} \PYG{n}{itermax}\PYG{o}{=}\PYG{l+m+mi}{20}\PYG{p}{,} \PYG{n}{n}\PYG{o}{=}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{n}{passes}\PYG{o}{=}\PYG{l+m+mi}{10}\PYG{p}{,} \PYG{n}{mu}\PYG{o}{=}\PYG{l+m+mi}{1000}\PYG{p}{,} \PYG{n}{ncores}\PYG{o}{=}\PYG{l+m+mi}{15}\PYG{p}{)}
+    \PYG{n}{logging}\PYG{o}{.}\PYG{n}{info}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{Refinement process complete.}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+\end{sphinxVerbatim}
 
 
 \renewcommand{\indexname}{Python Module Index}

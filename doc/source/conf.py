@@ -14,8 +14,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path('../../',   'MSTOkG').resolve()))
 
 project = 'MSTOkG'
-copyright = '2025, Subimal Deb'
-author = 'Subimal Deb'
+copyright = ''
+author = 'Subimal Deb, V. S. Prasannaa'
 release = '0.1'
 
 # -- General configuration ---------------------------------------------------

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Building the dataset &#8212; MSTOkG 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=2709fde1"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="API" href="api.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="building-the-dataset">
+<h1>Building the dataset<a class="headerlink" href="#building-the-dataset" title="Link to this heading">¶</a></h1>
+<p>This is the code that has been used to build the MSTO-KG basis sets.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Computing the MSTO-$K$G basis sets</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+
+<span class="c1"># Import your quantum chemistry modules</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">MSTOkG.MSTOOptpar</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">getonecandidate_local</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">fac</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">candidate</span><span class="p">[</span><span class="s1">&#39;mol_CISD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mol</span>
+        <span class="n">fac_basis</span><span class="p">,</span> <span class="n">fac_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">fac</span>
+        <span class="n">mol1</span> <span class="o">=</span> <span class="n">dmol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">fac_basis</span><span class="p">,</span> <span class="n">fac_r</span><span class="p">)</span>
+        <span class="n">en</span> <span class="o">=</span> <span class="n">getEnergies</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span> <span class="n">nroots</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">fci</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cisd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">en</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">AggressiveRefinement_v2</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">itermax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">passes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">ncores</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">en_data</span> <span class="o">=</span> <span class="n">getEnergies</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">nroots</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">fci</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cisd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">en0_val</span> <span class="o">=</span> <span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">]</span>
+    <span class="n">facs</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">10</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="mf">1e9</span>
+    <span class="n">n_cores</span> <span class="o">=</span> <span class="n">ncores</span>
+
+    <span class="c1"># Initialize CSV</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s1">&#39;Timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;Pass&#39;</span><span class="p">,</span> <span class="s1">&#39;Fac&#39;</span><span class="p">,</span> <span class="s1">&#39;Iteration&#39;</span><span class="p">,</span> <span class="s1">&#39;Tasks_Finished&#39;</span><span class="p">,</span> <span class="s1">&#39;CISD_Energy&#39;</span><span class="p">,</span> <span class="s1">&#39;Error&#39;</span><span class="p">])</span>
+
+    <span class="n">passno</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">passno</span><span class="o">&lt;</span><span class="n">passes</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fac_idx</span><span class="p">,</span> <span class="n">fac</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">facs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">shot</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shots</span><span class="p">):</span>
+                
+                <span class="n">Improved</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">iters</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">while</span> <span class="n">Improved</span> <span class="ow">and</span> <span class="n">err</span> <span class="o">&gt;</span> <span class="n">tol</span> <span class="ow">and</span> <span class="n">iters</span> <span class="o">&lt;</span> <span class="n">itermax</span><span class="p">:</span>
+                    <span class="n">faci</span> <span class="o">=</span> <span class="n">fac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+                    <span class="n">Improved</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="c1"># total_tasks = shots * mu</span>
+                    <span class="n">total_tasks</span> <span class="o">=</span>  <span class="n">mu</span>
+                    
+                    <span class="n">tasks</span> <span class="o">=</span> <span class="p">(</span><span class="n">delayed</span><span class="p">(</span><span class="n">getonecandidate_local</span><span class="p">)(</span><span class="n">en_data</span><span class="p">,</span> <span class="n">fac</span><span class="o">=</span><span class="n">faci</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_tasks</span><span class="p">))</span>
+                    <span class="n">joblib_generator</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_cores</span><span class="p">,</span> <span class="n">return_as</span><span class="o">=</span><span class="s1">&#39;generator&#39;</span><span class="p">)(</span><span class="n">tasks</span><span class="p">)</span>
+    
+                    <span class="n">tasks_finished</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">joblib_generator</span><span class="p">:</span>
+                        <span class="n">tasks_finished</span> <span class="o">+=</span> <span class="mi">1</span>
+                        
+                        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">]:</span>
+                                <span class="n">en_data</span> <span class="o">=</span> <span class="n">result</span>
+                                <span class="n">Improved</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">dumpBSI</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">getEnergies</span><span class="p">(</span><span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;mol_CISD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mol</span><span class="p">,</span> <span class="n">fci</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span> <span class="n">fname</span><span class="o">=</span><span class="n">fname</span><span class="p">)</span>
+                                <span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">en0_val</span> <span class="o">-</span> <span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">])</span>
+                                <span class="n">en0_val</span> <span class="o">=</span> <span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">]</span>
+                                
+                                <span class="c1"># Log improvement to the .log file</span>
+                                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;IMPROVEMENT: Pass </span><span class="si">{</span><span class="n">passno</span><span class="si">}</span><span class="s2">, Iter </span><span class="si">{</span><span class="n">iters</span><span class="si">}</span><span class="s2"> | New Energy: </span><span class="si">{</span><span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.10f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                
+                                <span class="c1"># Log to CSV for plotting later</span>
+                                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                                    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                                    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span> <span class="n">passno</span><span class="p">,</span> <span class="n">faci</span><span class="p">,</span> <span class="n">iters</span><span class="p">,</span> <span class="n">tasks_finished</span><span class="p">,</span> <span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">],</span> <span class="n">err</span><span class="p">])</span>
+                                <span class="c1"># iters=max([0,iters-1])</span>
+                                <span class="c1"># Terminal Progress Update (Status Bar)</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s2"> | k = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> | Pass </span><span class="si">{</span><span class="n">passno</span><span class="si">}</span><span class="s2"> shot: </span><span class="si">{</span><span class="n">shot</span><span class="si">}</span><span class="s2"> | Progress: </span><span class="si">{</span><span class="n">tasks_finished</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_tasks</span><span class="si">}</span><span class="s2"> | Best E: </span><span class="si">{</span><span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.10f</span><span class="si">}</span><span class="s2"> | fac: </span><span class="si">{</span><span class="n">faci</span><span class="si">}</span><span class="s2"> | err: </span><span class="si">{</span><span class="n">err</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+                        <span class="c1"># Terminal Progress Update (Status Bar)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s2"> | k = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> | Pass </span><span class="si">{</span><span class="n">passno</span><span class="si">}</span><span class="s2"> shot: </span><span class="si">{</span><span class="n">shot</span><span class="si">}</span><span class="s2"> | Progress: </span><span class="si">{</span><span class="n">tasks_finished</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_tasks</span><span class="si">}</span><span class="s2"> | Best E: </span><span class="si">{</span><span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.10f</span><span class="si">}</span><span class="s2"> | fac: </span><span class="si">{</span><span class="n">faci</span><span class="si">}</span><span class="s2"> | err: </span><span class="si">{</span><span class="n">err</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    
+                    <span class="nb">print</span><span class="p">()</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finished Iteration </span><span class="si">{</span><span class="n">iters</span><span class="si">}</span><span class="s2"> of Pass </span><span class="si">{</span><span class="n">passno</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">iters</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s2"> | k = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> | Pass </span><span class="si">{</span><span class="n">passno</span><span class="si">}</span><span class="s2"> shot: </span><span class="si">{</span><span class="n">shot</span><span class="si">}</span><span class="s2"> | Progress: </span><span class="si">{</span><span class="n">tasks_finished</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">total_tasks</span><span class="si">}</span><span class="s2"> | Best E: </span><span class="si">{</span><span class="n">en_data</span><span class="p">[</span><span class="s1">&#39;CISD&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.10f</span><span class="si">}</span><span class="s2"> | fac: </span><span class="si">{</span><span class="n">faci</span><span class="si">}</span><span class="s2"> | err: </span><span class="si">{</span><span class="n">err</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">passno</span> <span class="o">=</span><span class="n">passno</span><span class="o">+</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">element</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># --- Setup Logging ---</span>
+    <span class="n">log_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;refinement_</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">_%H%M%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">.log&quot;</span>
+    <span class="n">csv_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;convergence_</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">_%H%M%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+    
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> [</span><span class="si">%(levelname)s</span><span class="s1">] </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">log_filename</span><span class="p">),</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)]</span>
+    <span class="p">)</span>
+    <span class="n">dirname</span> <span class="o">=</span> <span class="s2">&quot;./data/&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">klst</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">:]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">klst</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">klst</span><span class="p">:</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;MOBS_</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s2">_msto-</span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">g.pickle&quot;</span><span class="p">)</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">FetchBestMol</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">dirname</span><span class="o">=</span><span class="n">dirname</span><span class="p">)</span>
+        
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting refinement for </span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s2"> (k=</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="n">AggressiveRefinement_v2</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">itermax</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">passes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">ncores</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Refinement process complete.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">MSTOkG</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building the dataset</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="api.html" title="previous chapter">API</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/mkmsto.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

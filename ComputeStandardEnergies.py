@@ -4,7 +4,7 @@
 # In[1]:
 
 
-from MSTOkG.MSTOOpt import *
+from MSTOkG.MSTOOptpar import *
 # from joblib import Parallel, delayed
 import sys
 from pyscf import gto, scf, fci
@@ -21,9 +21,7 @@ df = {}
 # In[ ]:
 
 
-#for element in 'B C N O F'.split(' '):
-#for element in 'H Li Be B'.split(' '):
-for element in 'N O F'.split(' '):
+for element in 'H Li Be B C N O F'.split(' '):
     #print(f"Element: {element:3s}", end='; ', flush=True)
     df[element] = pd.DataFrame(columns=["k", "Basis", "E_HF", "E_FCI", "E_cor(FCI)"])
 

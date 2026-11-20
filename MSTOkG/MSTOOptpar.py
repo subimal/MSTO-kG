@@ -389,7 +389,26 @@ def CrossOvers(pop):
     return colst
 
 def Mutate(pop, facs):
-    '''Creates a population of molecules by mutations from a given population. Do not use this. Use `Mutate_v2` instead.'''
+    '''
+    Creates a population of molecules by applying random fluctuations to the best candidate.
+
+    .. note::
+       This function is deprecated. Using :func:`Mutate_v2` is preferred as it
+       utilizes parameter gradients between individuals for more efficient exploration.
+
+    This operator takes the current best candidate and generates new individuals
+    by perturbing basis set parameters and geometry using the :func:`dmol` function.
+    The population is updated if a mutant achieves a lower CISD energy than the
+    existing best candidate.
+
+    :param pop: Current population of [energy, molecule] pairs.
+    :type pop: list
+    :param facs: A tuple/list containing (basis_perturbation_factor, geometry_perturbation_factor).
+    :type facs: list
+    :return: The updated population sorted by energy.
+    :rtype: list
+    '''
+
     mulst = pop[:]
     Nparents = len(pop)
     iden,basis = getcoeffs(pop[0][1])
@@ -407,7 +426,24 @@ def Mutate(pop, facs):
     return mulst
 
 def Mutate_v2(pop, facs):
-    '''Creates a population of molecules by mutations from a given population.'''
+    '''
+    Creates a population of molecules using interpolative mutations between individuals.
+
+    .. note::
+       This is the preferred mutation operator for MSTO optimization.
+
+    Unlike standard random mutation, this version calculates a "parameter gradient"
+    between two existing individuals in the population. It then shifts
+    the parameters of the better individual toward the other by a randomized
+    fraction, allowing for a more directed search of the parameter space.
+
+    :param pop: Current population of [energy, molecule] pairs.
+    :type pop: list
+    :param facs: A list containing the scaling factor for the mutation step size.
+    :type facs: list
+    :return: The updated population containing successful mutants.
+    :rtype: list
+    '''
     mulst = [pop[0]] #pop[:]
     Nparents = len(pop)
     iden,basis = getcoeffs(pop[0][1])
@@ -753,6 +789,78 @@ def LogicalRefinement(element, Nmax, trials=20, tol=1e-16, trials_mu=15, trials_
             # k=k-1
      
 
+def getonecandidate_local(candidate, fac=1e-1):
+    try:
+        mol = candidate['mol_CISD'].mol
+        fac_basis, fac_r = np.random.random(2)*fac
+        mol1 = dmol(mol, fac_basis, fac_r)
+        en = getEnergies(mol1, nroots=4, fci=False, cisd=True)
+        return en
+    except Exception:
+        return None
+
+def AggressiveRefinement_v2(mol, fname, shots=10, tol=1e-8, itermax=10, n=3, passes=5, mu=50, ncores=10):
+    en_data = getEnergies(mol, nroots=4, fci=False, cisd=True)
+    en0_val = en_data['CISD']
+    facs = 1/10**np.arange(0, n+1)
+    err = 1e9
+    n_cores = ncores
+
+    # Initialize CSV
+    with open(csv_filename, mode='w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Timestamp', 'Pass', 'Fac', 'Iteration', 'Tasks_Finished', 'CISD_Energy', 'Error'])
+
+    passno = 0
+    while passno<passes:
+        for fac_idx, fac in enumerate(facs):
+            for shot in range(shots):
+                
+                Improved = True
+                iters = 0
+                while Improved and err > tol and iters < itermax:
+                    faci = fac * np.random.random()
+                    Improved = False
+                    # total_tasks = shots * mu
+                    total_tasks =  mu
+                    
+                    tasks = (delayed(getonecandidate_local)(en_data, fac=faci) for _ in range(total_tasks))
+                    joblib_generator = Parallel(n_jobs=n_cores, return_as='generator')(tasks)
+    
+                    tasks_finished = 0
+                    for result in joblib_generator:
+                        tasks_finished += 1
+                        
+                        if result is not None:
+                            if result['CISD'] < en_data['CISD']:
+                                en_data = result
+                                Improved = True
+                                dumpBSI(deepcopy(getEnergies(en_data['mol_CISD'].mol, fci=True)), fname=fname)
+                                err = np.abs(en0_val - en_data['CISD'])
+                                en0_val = en_data['CISD']
+                                
+                                # Log improvement to the .log file
+                                logging.info(f"IMPROVEMENT: Pass {passno}, Iter {iters} | New Energy: {en_data['CISD']:.10f}")
+                                
+                                # Log to CSV for plotting later
+                                with open(csv_filename, mode='a', newline='') as f:
+                                    writer = csv.writer(f)
+                                    writer.writerow([datetime.now(), passno, faci, iters, tasks_finished, en_data['CISD'], err])
+                                # iters=max([0,iters-1])
+                                # Terminal Progress Update (Status Bar)
+                                print(f"{element} | k = {k} | Pass {passno} shot: {shot} | Progress: {tasks_finished}/{total_tasks} | Best E: {en_data['CISD']:.10f} | fac: {faci} | err: {err:.4g}", end='\r', flush=True)
+    
+                        # Terminal Progress Update (Status Bar)
+                        print(f"{element} | k = {k} | Pass {passno} shot: {shot} | Progress: {tasks_finished}/{total_tasks} | Best E: {en_data['CISD']:.10f} | fac: {faci} | err: {err:.4g}", end='\r', flush=True)
+                    
+                    print()
+                    logging.info(f"Finished Iteration {iters} of Pass {passno}")
+                    iters += 1
+        print(f"{element} | k = {k} | Pass {passno} shot: {shot} | Progress: {tasks_finished}/{total_tasks} | Best E: {en_data['CISD']:.10f} | fac: {faci} | err: {err:.4g}", end='\r', flush=True)
+        passno =passno+1
+    print()
+
+
 def moldict(basis):
     '''Returns a `pyscf.gto.mole.Mole` molecule dictionary for the chosen basis. The atom positions are from standard data. The elements/molecules are limited and can be improved. This is to provide a ready database of molecules.
 
@@ -893,368 +1001,368 @@ def moldict(basis):
     return mol
 
 
-def PrintEnergies2(element, ncas=None, nelecas=None, dirname = "./AtomOptimizedv3/", table=True, coeffs=False, prefix="MOBS"):
+# def PrintEnergies2(element, ncas=None, nelecas=None, dirname = "./AtomOptimizedv3/", table=True, coeffs=False, prefix="MOBS"):
 
-    assert ncas!=None and nelecas!=None, "Give values for ncas and nelecas."
-    styles = [dict(selector="caption",
-                       props=[("text-align", "center"),
-                              ("font-size", "150%"),
-                              ("color", 'black')])]
+#     assert ncas!=None and nelecas!=None, "Give values for ncas and nelecas."
+#     styles = [dict(selector="caption",
+#                        props=[("text-align", "center"),
+#                               ("font-size", "150%"),
+#                               ("color", 'black')])]
 
-    columns=['k', "basis", "HF", "FCI", "CISD", "Ecorr(CISD)", "CASSCF", "NEVPT", r"'CASSCF+NEVPT"]
-    df = pd.DataFrame(columns=columns)
+#     columns=['k', "basis", "HF", "FCI", "CISD", "Ecorr(CISD)", "CASSCF", "NEVPT", r"'CASSCF+NEVPT"]
+#     df = pd.DataFrame(columns=columns)
     
-    # get the STO basis done
-    for k in range(2,7):
-        fname = os.path.join(dirname, f"BS_{element}_sto-{k}g.pickle")
-        try:
-            l = loadBSI(fname)
-            mol = l['mol_HF'].mol
-            en_casscf = '\0'
-            E_nevpt2 = '\0'
-            try:
-                mf = scf.ROHF(mol).run()
-                mc = mcscf.CASSCF(mf, ncas=ncas, nelecas=nelecas) 
-                #2s and above is auto chosen by pyscf with ncas, it's the homo. 
-                #Giving ncas of 1 and nelecas of 1 means you only have 2s, so no correl. Sanity check 1. 
-                #Giving ncas of 4 and nelecas of 1 still must yield no correl, almost. Sanity check 2. 
-                mc.kernel() 
-                en_casscf = mc.e_tot
-                # print(f"en_casscf = {en_casscf}")
+#     # get the STO basis done
+#     for k in range(2,7):
+#         fname = os.path.join(dirname, f"BS_{element}_sto-{k}g.pickle")
+#         try:
+#             l = loadBSI(fname)
+#             mol = l['mol_HF'].mol
+#             en_casscf = '\0'
+#             E_nevpt2 = '\0'
+#             try:
+#                 mf = scf.ROHF(mol).run()
+#                 mc = mcscf.CASSCF(mf, ncas=ncas, nelecas=nelecas) 
+#                 #2s and above is auto chosen by pyscf with ncas, it's the homo. 
+#                 #Giving ncas of 1 and nelecas of 1 means you only have 2s, so no correl. Sanity check 1. 
+#                 #Giving ncas of 4 and nelecas of 1 still must yield no correl, almost. Sanity check 2. 
+#                 mc.kernel() 
+#                 en_casscf = mc.e_tot
+#                 # print(f"en_casscf = {en_casscf}")
     
-                E_nevpt2 = mrpt.NEVPT(mc).kernel()
-                # print(E_nevpt2)
-                # print(mc.e_tot + E_nevpt2)
-            except:
-                pass
+#                 E_nevpt2 = mrpt.NEVPT(mc).kernel()
+#                 # print(E_nevpt2)
+#                 # print(mc.e_tot + E_nevpt2)
+#             except:
+#                 pass
                 
-            df.loc[len(df)] = dict(zip(columns, 
-                            [k, 'STO', l['HF'], l['FCI'][0], l['CISD'], l['mol_CISD'].e_corr[0], en_casscf, E_nevpt2, en_casscf+E_nevpt2 ]))
-        except:
-            pass
-    # get the MSTO basis done
-    for k in range(2,12):
-        fname = os.path.join(dirname, f"MOBS_{element}_msto-{k:02d}g.pickle")
-        try:
-            l = loadBSI(fname)
-            mol = l['mol_HF'].mol
-            en_casscf = '\0'
-            E_nevpt2 = '\0'
-            try:
-                mf = scf.ROHF(mol).run()
-                mc = mcscf.CASSCF(mf, ncas=ncas, nelecas=nelecas) 
-                #2s and above is auto chosen by pyscf with ncas, it's the homo. 
-                #Giving ncas of 1 and nelecas of 1 means you only have 2s, so no correl. Sanity check 1. 
-                #Giving ncas of 4 and nelecas of 1 still must yield no correl, almost. Sanity check 2. 
-                mc.kernel() 
-                en_casscf = mc.e_tot
-                # print(f"en_casscf = {en_casscf}")
+#             df.loc[len(df)] = dict(zip(columns, 
+#                             [k, 'STO', l['HF'], l['FCI'][0], l['CISD'], l['mol_CISD'].e_corr[0], en_casscf, E_nevpt2, en_casscf+E_nevpt2 ]))
+#         except:
+#             pass
+#     # get the MSTO basis done
+#     for k in range(2,12):
+#         fname = os.path.join(dirname, f"MOBS_{element}_msto-{k:02d}g.pickle")
+#         try:
+#             l = loadBSI(fname)
+#             mol = l['mol_HF'].mol
+#             en_casscf = '\0'
+#             E_nevpt2 = '\0'
+#             try:
+#                 mf = scf.ROHF(mol).run()
+#                 mc = mcscf.CASSCF(mf, ncas=ncas, nelecas=nelecas) 
+#                 #2s and above is auto chosen by pyscf with ncas, it's the homo. 
+#                 #Giving ncas of 1 and nelecas of 1 means you only have 2s, so no correl. Sanity check 1. 
+#                 #Giving ncas of 4 and nelecas of 1 still must yield no correl, almost. Sanity check 2. 
+#                 mc.kernel() 
+#                 en_casscf = mc.e_tot
+#                 # print(f"en_casscf = {en_casscf}")
     
-                E_nevpt2 = mrpt.NEVPT(mc).kernel()
-                # print(E_nevpt2)
-                # print(mc.e_tot + E_nevpt2)
-            except:
-                pass
+#                 E_nevpt2 = mrpt.NEVPT(mc).kernel()
+#                 # print(E_nevpt2)
+#                 # print(mc.e_tot + E_nevpt2)
+#             except:
+#                 pass
                 
-            df.loc[len(df)] = dict(zip(columns, 
-                            [k, 'MSTO', l['HF'], l['FCI'][0], l['CISD'], l['mol_CISD'].e_corr[0], en_casscf, E_nevpt2, en_casscf+E_nevpt2   ]))
-        except:
-            pass
+#             df.loc[len(df)] = dict(zip(columns, 
+#                             [k, 'MSTO', l['HF'], l['FCI'][0], l['CISD'], l['mol_CISD'].e_corr[0], en_casscf, E_nevpt2, en_casscf+E_nevpt2   ]))
+#         except:
+#             pass
 
-    for basis in ['6-31g', 'ccpvdz']:
-        try:
-            l = loadBSI(os.path.join(dirname, f"BS_{element}_{basis}.pickle") )
-            mol = l['mol_HF'].mol
-            en_casscf = '\0'
-            E_nevpt2 = '\0'
-            try:
-                mf = scf.ROHF(mol).run()
-                mc = mcscf.CASSCF(mf, ncas=ncas, nelecas=nelecas) 
-                #2s and above is auto chosen by pyscf with ncas, it's the homo. 
-                #Giving ncas of 1 and nelecas of 1 means you only have 2s, so no correl. Sanity check 1. 
-                #Giving ncas of 4 and nelecas of 1 still must yield no correl, almost. Sanity check 2. 
-                mc.kernel() 
-                en_casscf = mc.e_tot
-                # print(f"en_casscf = {en_casscf}")
+#     for basis in ['6-31g', 'ccpvdz']:
+#         try:
+#             l = loadBSI(os.path.join(dirname, f"BS_{element}_{basis}.pickle") )
+#             mol = l['mol_HF'].mol
+#             en_casscf = '\0'
+#             E_nevpt2 = '\0'
+#             try:
+#                 mf = scf.ROHF(mol).run()
+#                 mc = mcscf.CASSCF(mf, ncas=ncas, nelecas=nelecas) 
+#                 #2s and above is auto chosen by pyscf with ncas, it's the homo. 
+#                 #Giving ncas of 1 and nelecas of 1 means you only have 2s, so no correl. Sanity check 1. 
+#                 #Giving ncas of 4 and nelecas of 1 still must yield no correl, almost. Sanity check 2. 
+#                 mc.kernel() 
+#                 en_casscf = mc.e_tot
+#                 # print(f"en_casscf = {en_casscf}")
     
-                E_nevpt2 = mrpt.NEVPT(mc).kernel()
-                # print(E_nevpt2)
-                # print(mc.e_tot + E_nevpt2)
-            except:
-                pass
+#                 E_nevpt2 = mrpt.NEVPT(mc).kernel()
+#                 # print(E_nevpt2)
+#                 # print(mc.e_tot + E_nevpt2)
+#             except:
+#                 pass
                 
-            df.loc[len(df)] = dict(zip(columns, 
-                            ['\0', basis, l['HF'], l['FCI'][0], l['CISD'], l['mol_CISD'].e_corr[0], en_casscf, E_nevpt2, en_casscf+E_nevpt2  ]))
-        except:
-            pass
+#             df.loc[len(df)] = dict(zip(columns, 
+#                             ['\0', basis, l['HF'], l['FCI'][0], l['CISD'], l['mol_CISD'].e_corr[0], en_casscf, E_nevpt2, en_casscf+E_nevpt2  ]))
+#         except:
+#             pass
 
-    for basis in ['ccpvtz', 'ccpvqz']:
-        try:
-            l = loadBSI(os.path.join(dirname, f"BS_{element}_{'6-31g'}.pickle") )
-            mol = l['mol_HF'].mol
-            mol.basis = basis
-            mol.build()
-            en_casscf = '\0'
-            E_nevpt2 = '\0'
-            try:
-                mf = scf.ROHF(mol).run()
-                mc = mcscf.CASSCF(mf, ncas=ncas, nelecas=nelecas) 
-                #2s and above is auto chosen by pyscf with ncas, it's the homo. 
-                #Giving ncas of 1 and nelecas of 1 means you only have 2s, so no correl. Sanity check 1. 
-                #Giving ncas of 4 and nelecas of 1 still must yield no correl, almost. Sanity check 2. 
-                mc.kernel() 
-                en_casscf = mc.e_tot
-                # print(f"en_casscf = {en_casscf}")
+#     for basis in ['ccpvtz', 'ccpvqz']:
+#         try:
+#             l = loadBSI(os.path.join(dirname, f"BS_{element}_{'6-31g'}.pickle") )
+#             mol = l['mol_HF'].mol
+#             mol.basis = basis
+#             mol.build()
+#             en_casscf = '\0'
+#             E_nevpt2 = '\0'
+#             try:
+#                 mf = scf.ROHF(mol).run()
+#                 mc = mcscf.CASSCF(mf, ncas=ncas, nelecas=nelecas) 
+#                 #2s and above is auto chosen by pyscf with ncas, it's the homo. 
+#                 #Giving ncas of 1 and nelecas of 1 means you only have 2s, so no correl. Sanity check 1. 
+#                 #Giving ncas of 4 and nelecas of 1 still must yield no correl, almost. Sanity check 2. 
+#                 mc.kernel() 
+#                 en_casscf = mc.e_tot
+#                 # print(f"en_casscf = {en_casscf}")
     
-                E_nevpt2 = mrpt.NEVPT(mc).kernel()
-                # print(E_nevpt2)
-                # print(mc.e_tot + E_nevpt2)
-            except:
-                pass
+#                 E_nevpt2 = mrpt.NEVPT(mc).kernel()
+#                 # print(E_nevpt2)
+#                 # print(mc.e_tot + E_nevpt2)
+#             except:
+#                 pass
                 
-            df.loc[len(df)] = dict(zip(columns, 
-                            ['\0', basis, l['HF'], l['FCI'][0], l['CISD'], l['mol_CISD'].e_corr[0], en_casscf, E_nevpt2, en_casscf+E_nevpt2  ]))
-        except:
-            pass
-    # df = df.style.set_caption(f"Comparing MSTO basis energies (Ncas = {ncas}, Nelecas={nelecas})")
-    return df
+#             df.loc[len(df)] = dict(zip(columns, 
+#                             ['\0', basis, l['HF'], l['FCI'][0], l['CISD'], l['mol_CISD'].e_corr[0], en_casscf, E_nevpt2, en_casscf+E_nevpt2  ]))
+#         except:
+#             pass
+#     # df = df.style.set_caption(f"Comparing MSTO basis energies (Ncas = {ncas}, Nelecas={nelecas})")
+#     return df
 
 
-def PrintEnergies(element, dirname = "./AtomOptimizedv3/", table=True, coeffs=False, plot=False, prefix="MOBS", save=True, ylim=None, ylim_ecor=None, kmax=11, inset_loc = [0.1,0.6, 0.35, 0.35], inset_xlim=(1.9,11.1), inset_ylim=(-10,0)):
-    try:
-        STO = {}
-        STO_ecor = {}
-        for k in range(2,7):
-            # mol = pyscf.M(
-            #                             atom = f'''{element} 0.0 0.0 0.0;''', # in Angstrom
-            #                             basis = {element: gto.load(f"sto-{k if k<=6 else 6}g", element)},
-            #                             symmetry = False,
-            #                             spin=1
-            #                         )
-            fname = os.path.join(dirname, f"BS_{element}_sto-{k}g.pickle")
-            STO[k] = loadBSI(fname) #getEnergies(mol, nroots=4)
-            STO_ecor[k] = STO[k]['mol_CISD'].e_corr[0]
+# def PrintEnergies(element, dirname = "./AtomOptimizedv3/", table=True, coeffs=False, plot=False, prefix="MOBS", save=True, ylim=None, ylim_ecor=None, kmax=11, inset_loc = [0.1,0.6, 0.35, 0.35], inset_xlim=(1.9,11.1), inset_ylim=(-10,0)):
+#     try:
+#         STO = {}
+#         STO_ecor = {}
+#         for k in range(2,7):
+#             # mol = pyscf.M(
+#             #                             atom = f'''{element} 0.0 0.0 0.0;''', # in Angstrom
+#             #                             basis = {element: gto.load(f"sto-{k if k<=6 else 6}g", element)},
+#             #                             symmetry = False,
+#             #                             spin=1
+#             #                         )
+#             fname = os.path.join(dirname, f"BS_{element}_sto-{k}g.pickle")
+#             STO[k] = loadBSI(fname) #getEnergies(mol, nroots=4)
+#             STO_ecor[k] = STO[k]['mol_CISD'].e_corr[0]
             
         
-        MSTO = dict([(k, {'HF':'-', 'FCI':['-'], 'CISD':'-'}) for k in range(2,12)])
-        MSTO_coeffs = {}
-        MSTO_ecor = {}
-        files = [f for f in os.listdir(dirname) if os.path.isfile(os.path.join(dirname, f)) and f[-7:]=='.pickle']
-        for k in range(2,kmax+1):
-            fname = os.path.join(dirname, f"{prefix}_{element}_msto-{k:02d}g.pickle")
-            try:
-                MSTO[k]=loadBSI(fname)
-                MSTO_coeffs[k] = MSTO[k]['mol_CISD'].mol.basis
-                MSTO_ecor[k] = MSTO[k]['mol_CISD'].e_corr[0]
-                # print(f"MSTO_ecor[{k}] = {MSTO_ecor[k]}")
-            except:
-                pass
-    except:
-        pass
+#         MSTO = dict([(k, {'HF':'-', 'FCI':['-'], 'CISD':'-'}) for k in range(2,12)])
+#         MSTO_coeffs = {}
+#         MSTO_ecor = {}
+#         files = [f for f in os.listdir(dirname) if os.path.isfile(os.path.join(dirname, f)) and f[-7:]=='.pickle']
+#         for k in range(2,kmax+1):
+#             fname = os.path.join(dirname, f"{prefix}_{element}_msto-{k:02d}g.pickle")
+#             try:
+#                 MSTO[k]=loadBSI(fname)
+#                 MSTO_coeffs[k] = MSTO[k]['mol_CISD'].mol.basis
+#                 MSTO_ecor[k] = MSTO[k]['mol_CISD'].e_corr[0]
+#                 # print(f"MSTO_ecor[{k}] = {MSTO_ecor[k]}")
+#             except:
+#                 pass
+#     except:
+#         pass
         
-    T = PrettyTable()
-    T.field_names = ['k', 'HF (STO)', 'HF (MSTO)', 'FCI (STO)', 'FCI (MSTO)', 'CISD (STO)', 'CISD (MSTO)']
-    for k in range(2,7):
-        try:
-            T.add_row([k, "%10.7f"%STO[k]['HF'], "%10.7f"%MSTO[k]['HF'], "%10.7f"%STO[k]['FCI'][0], "%10.7f"%MSTO[k]['FCI'][0], "%10.7f"%STO[k]['CISD'], "%10.7f"%MSTO[k]['CISD']] )
-        except:
-            pass
+#     T = PrettyTable()
+#     T.field_names = ['k', 'HF (STO)', 'HF (MSTO)', 'FCI (STO)', 'FCI (MSTO)', 'CISD (STO)', 'CISD (MSTO)']
+#     for k in range(2,7):
+#         try:
+#             T.add_row([k, "%10.7f"%STO[k]['HF'], "%10.7f"%MSTO[k]['HF'], "%10.7f"%STO[k]['FCI'][0], "%10.7f"%MSTO[k]['FCI'][0], "%10.7f"%STO[k]['CISD'], "%10.7f"%MSTO[k]['CISD']] )
+#         except:
+#             pass
     
-    for k in range(7, kmax+1):
-        try:
-            T.add_row([k, '', "%10.7f"%MSTO[k]['HF'], '', "%10.7f"%MSTO[k]['FCI'][0], '', "%10.7f"%MSTO[k]['CISD']] )
-        except:
-            pass
-    T.align='l'
-    T.hrules = HRuleStyle.ALL
+#     for k in range(7, kmax+1):
+#         try:
+#             T.add_row([k, '', "%10.7f"%MSTO[k]['HF'], '', "%10.7f"%MSTO[k]['FCI'][0], '', "%10.7f"%MSTO[k]['CISD']] )
+#         except:
+#             pass
+#     T.align='l'
+#     T.hrules = HRuleStyle.ALL
 
-    T1 = PrettyTable()
-    T1.field_names = ['Basis', 'HF', 'FCI', 'CISD']
-    for basis in ['6-31g', 'ccpvdz']:
-        try:
-            en = loadBSI(os.path.join(dirname, f"BS_{element}_{basis}.pickle") )
-            T1.add_row([basis, "%10.7f"%en['HF'], "%10.7f"%en['FCI'][0], "%10.7f"%en['CISD']])
-        except:
-            pass
+#     T1 = PrettyTable()
+#     T1.field_names = ['Basis', 'HF', 'FCI', 'CISD']
+#     for basis in ['6-31g', 'ccpvdz']:
+#         try:
+#             en = loadBSI(os.path.join(dirname, f"BS_{element}_{basis}.pickle") )
+#             T1.add_row([basis, "%10.7f"%en['HF'], "%10.7f"%en['FCI'][0], "%10.7f"%en['CISD']])
+#         except:
+#             pass
 
-    en631g = loadBSI(os.path.join(dirname, f"BS_{element}_6-31g.pickle"))
-    enccpvdz = loadBSI(os.path.join(dirname, f"BS_{element}_ccpvdz.pickle"))
-    T1.align='l'
-    T1.hrules = HRuleStyle.ALL
+#     en631g = loadBSI(os.path.join(dirname, f"BS_{element}_6-31g.pickle"))
+#     enccpvdz = loadBSI(os.path.join(dirname, f"BS_{element}_ccpvdz.pickle"))
+#     T1.align='l'
+#     T1.hrules = HRuleStyle.ALL
 
-    T2 = PrettyTable()
-    T2.field_names = ['Basis', 'Ecor (CISD)']
-    for k in range(2,12):
-        if k in STO_ecor.keys():
-            T2.add_row([f"STO-{k}G", STO_ecor[k]])
-        if k in MSTO_ecor.keys():
-            try:
-                T2.add_row([f"MSTO-{k}G", MSTO_ecor[k][0]])
-            except:
-                T2.add_row([f"MSTO-{k}G", MSTO_ecor[k]])
+#     T2 = PrettyTable()
+#     T2.field_names = ['Basis', 'Ecor (CISD)']
+#     for k in range(2,12):
+#         if k in STO_ecor.keys():
+#             T2.add_row([f"STO-{k}G", STO_ecor[k]])
+#         if k in MSTO_ecor.keys():
+#             try:
+#                 T2.add_row([f"MSTO-{k}G", MSTO_ecor[k][0]])
+#             except:
+#                 T2.add_row([f"MSTO-{k}G", MSTO_ecor[k]])
                 
 
-    try:
-        T2.add_row(["6-31G", en631g['mol_CISD'].e_corr[0]])
-        T2.add_row(["CCPVDZ", enccpvdz['mol_CISD'].e_corr[0]])
-    except:
-        pass
+#     try:
+#         T2.add_row(["6-31G", en631g['mol_CISD'].e_corr[0]])
+#         T2.add_row(["CCPVDZ", enccpvdz['mol_CISD'].e_corr[0]])
+#     except:
+#         pass
         
-    print(f"Element: {element} (Last update: {time.strftime('%Y-%M-%D  %H:%M')})") 
-    if table:
-        print(T1)
-        print(T)
-        print(T2)
-    if coeffs:
-        pprint.pprint(MSTO_coeffs)
-    if plot:
-        # pl.ion()
-        x = [k for k in range(2, kmax+1)]
-        sto_fci = np.array([[k, STO[k]['FCI'][0]] for k in STO.keys() if k in STO.keys()] )
-        sto_hf = np.array([[k, STO[k]['HF']] for k in STO.keys() if k in STO.keys()])
-        sto_cisd = np.array([[k, STO[k]['CISD']] for k in STO.keys() if k in STO.keys()])
-        sto_ecor = np.array([[k, STO_ecor[k]] for k in STO_ecor.keys() ])
+#     print(f"Element: {element} (Last update: {time.strftime('%Y-%M-%D  %H:%M')})") 
+#     if table:
+#         print(T1)
+#         print(T)
+#         print(T2)
+#     if coeffs:
+#         pprint.pprint(MSTO_coeffs)
+#     if plot:
+#         # pl.ion()
+#         x = [k for k in range(2, kmax+1)]
+#         sto_fci = np.array([[k, STO[k]['FCI'][0]] for k in STO.keys() if k in STO.keys()] )
+#         sto_hf = np.array([[k, STO[k]['HF']] for k in STO.keys() if k in STO.keys()])
+#         sto_cisd = np.array([[k, STO[k]['CISD']] for k in STO.keys() if k in STO.keys()])
+#         sto_ecor = np.array([[k, STO_ecor[k]] for k in STO_ecor.keys() ])
         
         
-        msto_fci = np.array([[k, MSTO[k]['FCI'][0]] for k in MSTO.keys() if MSTO[k]['FCI'][0]!='-'])
-        msto_hf = np.array([[k, MSTO[k]['HF']] for k in MSTO.keys() if MSTO[k]['FCI'][0]!='-'])
-        msto_cisd = np.array([[k, MSTO[k]['CISD']] for k in MSTO.keys() if MSTO[k]['FCI'][0]!='-'])
-        msto_ecor = np.array([[k, MSTO_ecor[k]] for k in MSTO_ecor.keys() ])
+#         msto_fci = np.array([[k, MSTO[k]['FCI'][0]] for k in MSTO.keys() if MSTO[k]['FCI'][0]!='-'])
+#         msto_hf = np.array([[k, MSTO[k]['HF']] for k in MSTO.keys() if MSTO[k]['FCI'][0]!='-'])
+#         msto_cisd = np.array([[k, MSTO[k]['CISD']] for k in MSTO.keys() if MSTO[k]['FCI'][0]!='-'])
+#         msto_ecor = np.array([[k, MSTO_ecor[k]] for k in MSTO_ecor.keys() ])
         
-        # try:
-        #     msto_ecor = np.array([[k, MSTO_ecor[k][0]] for k in MSTO_ecor.keys() ])
-        # except:
-        #     msto_ecor = np.array([[k, MSTO_ecor[k]] for k in MSTO_ecor.keys() ])
+#         # try:
+#         #     msto_ecor = np.array([[k, MSTO_ecor[k][0]] for k in MSTO_ecor.keys() ])
+#         # except:
+#         #     msto_ecor = np.array([[k, MSTO_ecor[k]] for k in MSTO_ecor.keys() ])
             
-        # print("msto_ecor = ", msto_ecor)
-        # pl.ion()
-        fig = pl.figure(figsize=(10,5))
-        ax1 = fig.add_subplot(1,2,1)
-        ax2 = fig.add_subplot(1,2,2)
+#         # print("msto_ecor = ", msto_ecor)
+#         # pl.ion()
+#         fig = pl.figure(figsize=(10,5))
+#         ax1 = fig.add_subplot(1,2,1)
+#         ax2 = fig.add_subplot(1,2,2)
         
         
         
 
         
-        ax1.plot(sto_hf[:,0], sto_hf[:,1], 'o-', label='STO [HF]', alpha=0.5)
-        ax1.plot(msto_hf[:,0], msto_hf[:,1], 'o-', label='MSTO [HF]', alpha=0.5)
+#         ax1.plot(sto_hf[:,0], sto_hf[:,1], 'o-', label='STO [HF]', alpha=0.5)
+#         ax1.plot(msto_hf[:,0], msto_hf[:,1], 'o-', label='MSTO [HF]', alpha=0.5)
         
-        ax1.plot(msto_cisd[:,0], msto_cisd[:,1], 'o-', label='MSTO [CISD]', alpha=0.5)
-        ax1.plot(sto_cisd[:,0], sto_cisd[:,1], 'o-', label='STO [CISD]', alpha=0.5)
+#         ax1.plot(msto_cisd[:,0], msto_cisd[:,1], 'o-', label='MSTO [CISD]', alpha=0.5)
+#         ax1.plot(sto_cisd[:,0], sto_cisd[:,1], 'o-', label='STO [CISD]', alpha=0.5)
 
-        ax2.plot(sto_ecor[:,0], sto_ecor[:,1], 'o-', label='STO [CISD]', alpha=0.5)
-        # print(msto_ecor)
-        ax2.plot(msto_ecor[:,0], msto_ecor[:,1], 'o-', label='MSTO [CISD]', alpha=0.5)
+#         ax2.plot(sto_ecor[:,0], sto_ecor[:,1], 'o-', label='STO [CISD]', alpha=0.5)
+#         # print(msto_ecor)
+#         ax2.plot(msto_ecor[:,0], msto_ecor[:,1], 'o-', label='MSTO [CISD]', alpha=0.5)
 
-        try:
-            ax1.plot(sto_fci[:,0], sto_fci[:,1], 'o-', label='STO [FCI]', alpha=0.5)
-            ax1.plot(msto_fci[:,0], msto_fci[:,1], 'o-', label='MSTO [FCI]', alpha=0.5)
-        except:
-            pass
+#         try:
+#             ax1.plot(sto_fci[:,0], sto_fci[:,1], 'o-', label='STO [FCI]', alpha=0.5)
+#             ax1.plot(msto_fci[:,0], msto_fci[:,1], 'o-', label='MSTO [FCI]', alpha=0.5)
+#         except:
+#             pass
         
         
-        ax1.axhline(en631g['HF'], color="#0000ff", linestyle='dashed', label='6-31G (HF)', alpha=0.5)
-        try:
-            ax1.axhline(en631g['FCI'][0], color="#0000ff", linestyle='solid', label='6-31G (FCI)', alpha=0.5)
-            ax1.axhline(en631g['CISD'], color="#000000", linestyle='solid', label='6-31G (CISD)', alpha=0.5)
-            ax2.axhline(en631g['mol_CISD'].e_corr[0], color="#000000", linestyle='solid', label='6-31G (CISD)', alpha=0.5)
-        except:
-            pass
+#         ax1.axhline(en631g['HF'], color="#0000ff", linestyle='dashed', label='6-31G (HF)', alpha=0.5)
+#         try:
+#             ax1.axhline(en631g['FCI'][0], color="#0000ff", linestyle='solid', label='6-31G (FCI)', alpha=0.5)
+#             ax1.axhline(en631g['CISD'], color="#000000", linestyle='solid', label='6-31G (CISD)', alpha=0.5)
+#             ax2.axhline(en631g['mol_CISD'].e_corr[0], color="#000000", linestyle='solid', label='6-31G (CISD)', alpha=0.5)
+#         except:
+#             pass
             
         
-        ax1.axhline(enccpvdz['HF'], color="#00ff00", linestyle='dashed', label='cc-pVDZ (HF)', alpha=0.5)
-        try:
-            ax1.axhline(enccpvdz['FCI'][0], color="#00ff00", linestyle='solid', label='cc-pVDZ (FCI)', alpha=0.5)
-            ax1.axhline(enccpvdz['CISD'], color="#ff00ff", linestyle='solid', label='cc-pVDZ (CISD)', alpha=0.5)
-            ax2.axhline(enccpvdz['mol_CISD'].e_corr[0], color="#ff00ff", linestyle='solid', label='cc-pVDZ (CISD)', alpha=0.5)
-        except:
-            pass
+#         ax1.axhline(enccpvdz['HF'], color="#00ff00", linestyle='dashed', label='cc-pVDZ (HF)', alpha=0.5)
+#         try:
+#             ax1.axhline(enccpvdz['FCI'][0], color="#00ff00", linestyle='solid', label='cc-pVDZ (FCI)', alpha=0.5)
+#             ax1.axhline(enccpvdz['CISD'], color="#ff00ff", linestyle='solid', label='cc-pVDZ (CISD)', alpha=0.5)
+#             ax2.axhline(enccpvdz['mol_CISD'].e_corr[0], color="#ff00ff", linestyle='solid', label='cc-pVDZ (CISD)', alpha=0.5)
+#         except:
+#             pass
             
-        ax1.set_title(element)
-        ax1.set_xlabel(r"$k$")
-        ax1.set_ylabel(r"$E$ (Ha)")
-        ax1.legend(loc='right', framealpha=0.5)
+#         ax1.set_title(element)
+#         ax1.set_xlabel(r"$k$")
+#         ax1.set_ylabel(r"$E$ (Ha)")
+#         ax1.legend(loc='right', framealpha=0.5)
 
-        ax2.set_title(element)
-        ax2.set_xlabel(r"$k$")
-        ax2.set_ylabel(r"$E_\text{cor}$ (Ha)")
-        ax2.legend(loc='right', framealpha=0.5)
+#         ax2.set_title(element)
+#         ax2.set_xlabel(r"$k$")
+#         ax2.set_ylabel(r"$E_\text{cor}$ (Ha)")
+#         ax2.legend(loc='right', framealpha=0.5)
         
-        if ylim is not None:
-            ax1.set_ylim(ylim)
+#         if ylim is not None:
+#             ax1.set_ylim(ylim)
             
-        if ylim_ecor is not None:
-            ax2.set_ylim(ylim_ecor)
+#         if ylim_ecor is not None:
+#             ax2.set_ylim(ylim_ecor)
         
-        ax1.grid(True)
-        ax2.grid(True)
-        ############################################
-        ## adding the inset plot
-        axins = ax1.inset_axes(inset_loc, xlim=inset_xlim, ylim=inset_ylim)
-        axins.plot(sto_hf[:,0], sto_hf[:,1], 'o-', label='STO [HF]', alpha=0.5)
-        axins.plot(msto_hf[:,0], msto_hf[:,1], 'o-', label='MSTO [HF]', alpha=0.5)
+#         ax1.grid(True)
+#         ax2.grid(True)
+#         ############################################
+#         ## adding the inset plot
+#         axins = ax1.inset_axes(inset_loc, xlim=inset_xlim, ylim=inset_ylim)
+#         axins.plot(sto_hf[:,0], sto_hf[:,1], 'o-', label='STO [HF]', alpha=0.5)
+#         axins.plot(msto_hf[:,0], msto_hf[:,1], 'o-', label='MSTO [HF]', alpha=0.5)
         
-        axins.plot(msto_cisd[:,0], msto_cisd[:,1], 'o-', label='MSTO [CISD]', alpha=0.5)
-        axins.plot(sto_cisd[:,0], sto_cisd[:,1], 'o-', label='STO [CISD]', alpha=0.5)
+#         axins.plot(msto_cisd[:,0], msto_cisd[:,1], 'o-', label='MSTO [CISD]', alpha=0.5)
+#         axins.plot(sto_cisd[:,0], sto_cisd[:,1], 'o-', label='STO [CISD]', alpha=0.5)
 
-        try:
-            axins.plot(sto_fci[:,0], sto_fci[:,1], 'o-', label='STO [FCI]', alpha=0.5)
-            axins.plot(msto_fci[:,0], msto_fci[:,1], 'o-', label='MSTO [FCI]', alpha=0.5)
-        except:
-            pass
+#         try:
+#             axins.plot(sto_fci[:,0], sto_fci[:,1], 'o-', label='STO [FCI]', alpha=0.5)
+#             axins.plot(msto_fci[:,0], msto_fci[:,1], 'o-', label='MSTO [FCI]', alpha=0.5)
+#         except:
+#             pass
         
-        # en631g = loadBSI(os.path.join(dirname, f"BS_{element}_6-31g.pickle"))
-        axins.axhline(en631g['HF'], color="#0000ff", linestyle='dashed', label='6-31G (HF)', alpha=0.5)
-        try:
-            axins.axhline(en631g['FCI'][0], color="#0000ff", linestyle='solid', label='6-31G (FCI)', alpha=0.5)
-            axins.axhline(en631g['CISD'], color="#000000", linestyle='solid', label='6-31G (CISD)', alpha=0.5)
-        except:
-            pass
+#         # en631g = loadBSI(os.path.join(dirname, f"BS_{element}_6-31g.pickle"))
+#         axins.axhline(en631g['HF'], color="#0000ff", linestyle='dashed', label='6-31G (HF)', alpha=0.5)
+#         try:
+#             axins.axhline(en631g['FCI'][0], color="#0000ff", linestyle='solid', label='6-31G (FCI)', alpha=0.5)
+#             axins.axhline(en631g['CISD'], color="#000000", linestyle='solid', label='6-31G (CISD)', alpha=0.5)
+#         except:
+#             pass
             
-        # enccpvdz = loadBSI(os.path.join(dirname, f"BS_{element}_ccpvdz.pickle"))
-        axins.axhline(enccpvdz['HF'], color="#00ff00", linestyle='dashed', label='cc-pVDZ (HF)', alpha=0.5)
-        try:
-            axins.axhline(enccpvdz['FCI'][0], color="#00ff00", linestyle='solid', label='cc-pVDZ (FCI)', alpha=0.5)
-            axins.axhline(enccpvdz['CISD'], color="#ff00ff", linestyle='solid', label='cc-pVDZ (CISD)', alpha=0.5)
-        except:
-            pass
-        axins.set_xticks(range(int(inset_xlim[0]), int(inset_xlim[-1]+1)), [str(i) for i in range(int(inset_xlim[0]), int(inset_xlim[-1]+1))])
-        # axins.set_yticklabels('')
-        axins.grid(True)
+#         # enccpvdz = loadBSI(os.path.join(dirname, f"BS_{element}_ccpvdz.pickle"))
+#         axins.axhline(enccpvdz['HF'], color="#00ff00", linestyle='dashed', label='cc-pVDZ (HF)', alpha=0.5)
+#         try:
+#             axins.axhline(enccpvdz['FCI'][0], color="#00ff00", linestyle='solid', label='cc-pVDZ (FCI)', alpha=0.5)
+#             axins.axhline(enccpvdz['CISD'], color="#ff00ff", linestyle='solid', label='cc-pVDZ (CISD)', alpha=0.5)
+#         except:
+#             pass
+#         axins.set_xticks(range(int(inset_xlim[0]), int(inset_xlim[-1]+1)), [str(i) for i in range(int(inset_xlim[0]), int(inset_xlim[-1]+1))])
+#         # axins.set_yticklabels('')
+#         axins.grid(True)
 
-        pl.tight_layout()
-        if save:
-            fig.savefig(f"{element}.png", dpi=300)
-        return fig, T1, T, T2, MSTO, MSTO_coeffs
+#         pl.tight_layout()
+#         if save:
+#             fig.savefig(f"{element}.png", dpi=300)
+#         return fig, T1, T, T2, MSTO, MSTO_coeffs
 
-def FetchBestMol(element, k, dirname='./'):
-    '''Fetches the best available basis for optimization of `element` for cardinal number `k`.
+# def FetchBestMol(element, k, dirname='./'):
+#     '''Fetches the best available basis for optimization of `element` for cardinal number `k`.
     
-    The order is as follows for a cardinal number `k`:
+#     The order is as follows for a cardinal number `k`:
     
-    * MSTO-kG 
-    * STO-kG
-    * MSTO-(k-1)G
-    * STO-(k-1)G
-    * ........ 
+#     * MSTO-kG 
+#     * STO-kG
+#     * MSTO-(k-1)G
+#     * STO-(k-1)G
+#     * ..etc.
 
-    It is best to ensure that at least the STO-2G basis is available.
+#     It is best to ensure that at least the STO-2G basis is available.
 
-    To do:
+#     To do:
     
-    * if k<2 fetch the sto-2g basis within this function.
-    '''
-    try:
-        basis = f"msto-{k:02d}g"
-        mol = loadBSI(os.path.join(dirname, f"MOBS_{element}_{basis}.pickle"))['mol_CISD'].mol
-    except:
-        try:
-            basis = f"sto-{k}g"
-            mol = loadBSI(os.path.join(dirname, f"BS_{element}_{basis}.pickle"))['mol_CISD'].mol
-        except:
-            basis = f"sto-{6}g"
-            mol = loadBSI(os.path.join(dirname, f"BS_{element}_{basis}.pickle"))['mol_CISD'].mol
-    return BasisReshape(mol,k)
+#     * if k<2 fetch the sto-2g basis within this function.
+#     '''
+#     try:
+#         basis = f"msto-{k:02d}g"
+#         mol = loadBSI(os.path.join(dirname, f"MOBS_{element}_{basis}.pickle"))['mol_CISD'].mol
+#     except:
+#         try:
+#             basis = f"sto-{k}g"
+#             mol = loadBSI(os.path.join(dirname, f"BS_{element}_{basis}.pickle"))['mol_CISD'].mol
+#         except:
+#             basis = f"sto-{6}g"
+#             mol = loadBSI(os.path.join(dirname, f"BS_{element}_{basis}.pickle"))['mol_CISD'].mol
+#     return BasisReshape(mol,k)
 
 def DumpStandardBasis(element, basis, dirname='./', forcedump=False):
     '''Create the molecule object for a molecule in a given basis and dump in a file. 

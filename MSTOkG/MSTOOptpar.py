@@ -701,7 +701,7 @@ def AggressiveRefinement(mol, fname, trials=10, tol=1e-16, fci=True, itermax=100
                 try:
                     iters=iters+1
                     print(f"[i: {i:4d}.{iters:05d}] Best: {en:20.16g} +/- {err:5.3g} Ha, facs={fac:5.3g}"+' '*20, flush=True, end='\r')
-                    iters = iters+1
+                    # iters = iters+1
                     db = np.sin(np.random.random(size=basis.shape)*2*np.pi)
                     # # db = np.sin(np.random.normal(loc=0, scale=1, size=basis.shape)*2*np.pi)
                     basis1 = basis+fac*db/10**j
